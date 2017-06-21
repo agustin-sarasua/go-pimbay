@@ -31,15 +31,6 @@ type CreditCard struct {
 	Bank       string
 }
 
-type Report struct {
-	ID          string
-	Name        string
-	Account     *Account
-	CreditCard  *CreditCard
-	DateTime    util.DateTime
-	IndexedDate util.DateTime
-}
-
 type Expense struct {
 	ID          string
 	Amount      util.BigDecimal

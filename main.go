@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/agustin-sarasua/risk-core-light/web"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
@@ -54,7 +53,7 @@ func main() {
 	router := mux.NewRouter()
 
 	//router.HandleFunc("/fraud-info", GetPeopleEndpoint).Methods("GET")
-	router.HandleFunc("/fraud-info", web.ProcessSaveFraudInfo(session)).Methods("POST")
+	//router.HandleFunc("/fraud-info", web.ProcessSaveFraudInfo(session)).Methods("POST")
 
 	//var p = model.Person{Id: 1, Name: "Agustin", LastName: "Sarasua", Address: nil}
 	//people = append(people, p)
