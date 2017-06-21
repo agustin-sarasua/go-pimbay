@@ -1,18 +1,22 @@
 package model
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Report interface {
 	GetTransactionLines() []string
 	GetLines() []string
+	ParseLineDetail(l string) (time.Time, string, string, decimal.Decimal)
 }
 
-type ReportLineValidator interface {
+type ReportLine interface {
 	IsTransactionLine() bool
+	GetTransactionDate(l string) time.Time
 }
 
 type ItauReport struct {
@@ -32,14 +36,35 @@ func (r ItauReport) GetLines() []string {
 func (r ItauReport) GetTransactionLines() []string {
 	rs := r.Lines[:0]
 	for _, l := range r.Lines {
-		if r.IsTransactionLine(strings.TrimSpace(l)) {
-			rs = append(rs, l)
-		} else {
-			fmt.Print("NO TX LINE: ")
-			fmt.Println(l)
+		tl := strings.TrimSpace(l)
+		if r.IsTransactionLine(tl) {
+			rs = append(rs, tl)
 		}
 	}
 	return rs
+}
+
+func (r ItauReport) ParseLineDetail(l string) (time.Time, string, string, decimal.Decimal) {
+	return r.GetTransactionDate(l), r.GetCardLastDigits(l), "detail", decimal.Decimal{}
+}
+
+func (r ItauReport) GetTransactionDate(l string) time.Time {
+	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
+	layout := "02 01 06"
+	t := lineSearch.FindString(l)
+	rs, _ := time.Parse(layout, t)
+	return rs
+}
+
+func (r ItauReport) GetCardLastDigits(l string) string {
+	var lineDateSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
+	var lastDigitsSearch = regexp.MustCompile(`^\d{4}`)
+	t := strings.TrimSpace(lineDateSearch.ReplaceAllString(l, ""))
+	lastDigits := t[0:3]
+	if lastDigitsSearch.FindStringIndex(lastDigits) != nil {
+		return lastDigits
+	}
+	return "NOT_FOUND"
 }
 
 /* type ReportParser interface {

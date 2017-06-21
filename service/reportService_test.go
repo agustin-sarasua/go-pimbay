@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"regexp"
 
@@ -57,4 +58,12 @@ func TestReportParser(t *testing.T) {
 
 	report := model.ItauReport{Content: content, Lines: lines}
 	service.PrintValidReportLines(report)
+}
+
+func TestFormatShortYear(t *testing.T) {
+	value := "22 09 17"
+	layout := "02 01 06"
+	r, _ := time.Parse(layout, value)
+	fmt.Println(r)
+
 }

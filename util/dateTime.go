@@ -10,6 +10,14 @@ type DateTime struct {
 	time.Time
 }
 
+/*
+Count one-two-three-four and each place in the standard time corresponds to a component of a date/time object (the Time type in Go):
+one for day of the month,
+two for the month,
+three for the hour (in 12-hour time),
+four for the minutes, etc.
+*/
+
 const ctLayout = "2006/01/02|15:04:05"
 const ctLayout2 = "2017-06-23T09:50:00-03:00"
 
