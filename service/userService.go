@@ -39,7 +39,7 @@ func SigninUser(email, pwd string) <-chan *api.SignUpResponse {
 	go func() {
 		fmt.Println("SignIn User ", email)
 		jsonValue, _ := json.Marshal(api.SignUpRequest{Email: email, Password: pwd, ReturnSecureToken: true})
-		resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
+		resp, err := http.Post(signInEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
 		if err != nil {
 			panic(err)
 		}
