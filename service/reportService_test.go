@@ -37,15 +37,8 @@ func TestReadPdf(t *testing.T) {
 				fmt.Println(lineSearch.FindAllString(line, -1))
 			}
 		}
-
-		//regexp.Match(validID, line)
-		//for i := 0; i < len(line); i++ {
-		//fmt.Printf("%x ", line[i])
-
-		//}
 		fmt.Println("--")
 	}
-	//fmt.Println(content)
 	return
 }
 

@@ -29,7 +29,7 @@ func ReadPdf(path string) (string, error) {
 func PrintValidReportLines(r model.Report) {
 	ls := r.GetTransactionLines()
 	for _, l := range ls {
-		t, ld, _, _ := r.ParseLineDetail(l)
-		fmt.Println(t, " ", ld, " ", l)
+		t, ld, bn, c, a := r.ParseLineDetail(l)
+		fmt.Println(t, " ", ld, " ", bn, " ", c, a)
 	}
 }

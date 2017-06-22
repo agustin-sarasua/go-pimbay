@@ -5,13 +5,15 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+
 	"github.com/shopspring/decimal"
 )
 
 type Report interface {
 	GetTransactionLines() []string
 	GetLines() []string
-	ParseLineDetail(l string) (time.Time, string, string, decimal.Decimal)
+	ParseLineDetail(l string) (time.Time, string, string, string, decimal.Decimal)
 }
 
 type ReportLine interface {
@@ -44,12 +46,13 @@ func (r ItauReport) GetTransactionLines() []string {
 	return rs
 }
 
-func (r ItauReport) ParseLineDetail(l string) (time.Time, string, string, decimal.Decimal) {
-	return r.GetTransactionDate(l), r.GetCardLastDigits(l), "detail", decimal.Decimal{}
+func (r ItauReport) ParseLineDetail(l string) (time.Time, string, string, string, decimal.Decimal) {
+	c, d := r.GetTransactionAmount(l)
+	return r.GetTransactionDate(l), r.GetCardLastDigits(l), r.GetBusinessName(l), c, d
 }
 
 func (r ItauReport) GetTransactionDate(l string) time.Time {
-	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
+	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])`)
 	layout := "02 01 06"
 	t := lineSearch.FindString(l)
 	rs, _ := time.Parse(layout, t)
@@ -57,45 +60,42 @@ func (r ItauReport) GetTransactionDate(l string) time.Time {
 }
 
 func (r ItauReport) GetCardLastDigits(l string) string {
-	var lineDateSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
+	var lineDateSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])`)
 	var lastDigitsSearch = regexp.MustCompile(`^\d{4}`)
 	t := strings.TrimSpace(lineDateSearch.ReplaceAllString(l, ""))
-	lastDigits := t[0:3]
+	lastDigits := t[0:4]
 	if lastDigitsSearch.FindStringIndex(lastDigits) != nil {
 		return lastDigits
 	}
 	return "NOT_FOUND"
 }
 
-/* type ReportParser interface {
-	FilterReportLines() []string
-}
-
-type ReportLineParser interface {
-	IsValidTxLine() bool
-}
-
-type ItauReport struct {
-	Content string
-	Lines   []ItauReportLine
-}
-
-type ItauReportLine struct{ string }
-
-func (l ItauReportLine) IsValidTxLine() bool {
+func (r ItauReport) GetBusinessName(l string) string {
 	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
-	return lineSearch.FindStringIndex(l.string) != nil && lineSearch.FindStringIndex(l.string)[0] == 0
+	t := strings.TrimSpace(lineSearch.ReplaceAllString(l, ""))
+	a := strings.Split(t, "     ")
+	return strings.TrimSpace(a[0])
 }
 
-func (r ItauReport) FilterReportLines() []string {
-	rs := r.Lines[:0]
-	for _, l := range r.Lines {
-		if IsValidTxLine(l) {
-			rs = append(rs, l)
-		}
+func (r ItauReport) GetTransactionAmount(l string) (string, decimal.Decimal) {
+	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
+	var amountSearch = regexp.MustCompile(`\d*(\,)\d{2}$`)
+	t := strings.TrimSpace(lineSearch.ReplaceAllString(l, ""))
+	m := amountSearch.FindAllString(t, -1)
+	if m == nil {
+		panic("No amount found")
 	}
-	return rs
+	d, e := decimal.NewFromString(strings.Replace(m[0], ",", ".", 1))
+	if e != nil {
+		panic(e)
+	}
+	var c string
+	if len(t) == 93 {
+		c = "USD"
+	} else if len(t) == 79 {
+		c = "UYP"
+	} else {
+		fmt.Println("Largo extranio")
+	}
+	return c, d
 }
-
-func
-*/
