@@ -14,3 +14,22 @@ type SignUpResponse struct {
 	ExpiresIn    string `json:"expiresIn"`
 	LocalID      string `json:"localId"`
 }
+
+type AccountInfoReponse struct {
+	Kind  string `json:"kind"`
+	Users []struct {
+		LocalID          string `json:"localId"`
+		Email            string `json:"email"`
+		EmailVerified    bool   `json:"emailVerified"`
+		ProviderUserInfo []struct {
+			ProviderID  string `json:"providerId"`
+			FederatedID string `json:"federatedId"`
+			Email       string `json:"email"`
+			RawID       string `json:"rawId"`
+		} `json:"providerUserInfo"`
+		PasswordHash      string `json:"passwordHash"`
+		PasswordUpdatedAt int64  `json:"passwordUpdatedAt"`
+		ValidSince        string `json:"validSince"`
+		CreatedAt         string `json:"createdAt"`
+	} `json:"users"`
+}
