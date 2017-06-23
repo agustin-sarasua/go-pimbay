@@ -51,15 +51,14 @@ func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		//TODO call signup or signin
-
 		c := service.SigninUser(pair[0], pair[1])
 		rs := <-c
 		fmt.Println(rs)
-		/*if pair[0] != "username" && pair[1] != "password" {
+		if rs == nil && rs.IDToken == "" {
 			http.Error(w, "Not authorized", 401)
 			return
-		}*/
+		}
+		w.Header().Set("token", rs.IDToken)
 		h.ServeHTTP(w, r)
 	}
 }

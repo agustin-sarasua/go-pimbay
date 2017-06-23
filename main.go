@@ -53,13 +53,12 @@ func main() {
 	//Gorilla MUX
 	router := mux.NewRouter()
 
-	router.HandleFunc("/signin", use(web.SignupNewUserEndpoint(session), web.BasicAuth)).Methods("GET")
-	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
-	//router.HandleFunc("/fraud-info", web.ProcessSaveFraudInfo(session)).Methods("POST")
+	router.HandleFunc("/signin", use(web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
+	router.HandleFunc("/signup", web.SignupNewUserEndpoint(session)).Methods("POST")
 
-	//var p = model.Person{Id: 1, Name: "Agustin", LastName: "Sarasua", Address: nil}
-	//people = append(people, p)
-	fmt.Println("Hello there")
+	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
+
+	fmt.Println("Hello there...")
 	log.Fatal(http.ListenAndServe(":12345", router))
 }
 

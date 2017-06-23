@@ -44,8 +44,9 @@ func SignupNewUserEndpoint(s *mgo.Session) func(w http.ResponseWriter, req *http
 	}
 }
 
-func SigninUserEndpoint(w http.ResponseWriter, req *http.Request) string {
-	return ""
+func SigninUserEndpoint(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("User Logged in with token: ", w.Header().Get("token"))
+
 }
 
 func GetAccountInfo(w http.ResponseWriter, req *http.Request) {
