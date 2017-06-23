@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"fmt"
-
 	"github.com/agustin-sarasua/pimbay/service"
 )
 
@@ -23,7 +21,10 @@ func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 
 		c := service.GetAccountInfo(t)
 		rs := <-c
-		fmt.Println(rs)
+		if rs == nil {
+			http.Error(w, "Not authorized", 401)
+			return
+		}
 		h.ServeHTTP(w, r)
 	}
 }
@@ -53,7 +54,6 @@ func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 
 		c := service.SigninUser(pair[0], pair[1])
 		rs := <-c
-		fmt.Println(rs)
 		if rs == nil && rs.IDToken == "" {
 			http.Error(w, "Not authorized", 401)
 			return
