@@ -2,12 +2,13 @@ package web
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/agustin-sarasua/pimbay/api"
 
 	"fmt"
 
-	"github.com/agustin-sarasua/pimbay/model"
+	"github.com/agustin-sarasua/pimbay/service"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -16,31 +17,19 @@ func SignupNewUserEndpoint(s *mgo.Session) func(w http.ResponseWriter, req *http
 		session := s.Copy()
 		defer session.Close()
 
-		//params := mux.Vars(req)
-		var user model.User
-		err := json.NewDecoder(req.Body).Decode(&user)
-		req.Header.Get("Authorization")
-		//user.Id, _ = strconv.Atoi(params["id"])
-		//service.SignupNewUser()
-		c := session.DB("gopimbay").C("user")
-		err = c.Insert(user)
-		if err != nil {
-			if mgo.IsDup(err) {
-				ErrorWithJSON(w, "Book with this ISBN already exists", http.StatusBadRequest)
-				return
-			}
+		var msg api.SignupUserRestMsg
+		err := json.NewDecoder(req.Body).Decode(&msg)
 
-			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
-			log.Println("Failed insert book: ", err)
+		if err != nil {
+			ErrorWithJSON(w, "", http.StatusBadRequest)
 			return
 		}
 
+		service.SignupNewUser(s, &msg)
 		w.Header().Set("Content-Type", "application/json")
-		//w.Header().Set("Location", r.URL.Path+"/"+book.ISBN)
-		w.WriteHeader(http.StatusCreated)
 
-		// people = append(people, person)*/
-		json.NewEncoder(w).Encode(user)
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(msg)
 	}
 }
 
