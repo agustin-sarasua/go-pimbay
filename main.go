@@ -56,6 +56,8 @@ func main() {
 	router.HandleFunc("/signin", use(web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
 	router.HandleFunc("/signup", web.SignupNewUserEndpoint(session)).Methods("POST")
 
+	router.HandleFunc("/account", use(web.CreateAccountEndpoint(session), web.ValidateToken)).Methods("POST")
+
 	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
 
 	fmt.Println("Hello there...")
