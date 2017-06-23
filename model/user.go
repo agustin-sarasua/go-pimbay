@@ -15,12 +15,14 @@ type User struct {
 }
 
 type Account struct {
-	ID          string    `json:"id,omitempty" bson:"_id"`
-	Name        string    `json:"name" bson:"name"`
-	CreatedDate time.Time `json:"createdDate,omitempty" bson:"createdDate"`
+	ID          string        `json:"id,omitempty" bson:"_id"`
+	Name        string        `json:"name" bson:"name"`
+	CreatedDate time.Time     `json:"createdDate,omitempty" bson:"createdDate"`
+	CreditCards []*CreditCard `json:"creditCards,omitempty" bson:"creditCards"`
 }
 
 type CreditCard struct {
+	ID         string `json:"id" bson:"_id"`
 	Bin        string `json:"bin" bson:"bin"`
 	LastDigits string `json:"lastDigits" bson:"lastDigits"`
 	Type       string `json:"type" bson:"type"`
@@ -32,7 +34,8 @@ type CreditCard struct {
 		Phone string `json:"phone"`
 		City  string `json:"city"`
 	} `json:"bank"`
-	CountryCode string `json:"countryCode" bson:"countryCode"`
+	CountryCode string    `json:"countryCode" bson:"countryCode"`
+	CreatedDate time.Time `json:"createdDate" bson:"createdDate"`
 }
 
 /*
