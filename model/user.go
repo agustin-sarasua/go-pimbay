@@ -15,8 +15,9 @@ type User struct {
 }
 
 type Account struct {
-	ID   string `json:"id" bson:"_id"`
-	Name string `json:"name" bson:"name"`
+	ID          string    `json:"id,omitempty" bson:"_id"`
+	Name        string    `json:"name" bson:"name"`
+	CreatedDate time.Time `json:"createdDate,omitempty" bson:"createdDate"`
 }
 
 type CreditCard struct {
