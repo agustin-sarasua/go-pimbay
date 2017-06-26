@@ -7,12 +7,15 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
+	"github.com/agustin-sarasua/pimbay/model"
 	"github.com/agustin-sarasua/pimbay/web"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2"
+)
+
+var (
+	DB model.UserDatabase
 )
 
 func usage() {
@@ -32,21 +35,10 @@ func main() {
 	var buf bytes.Buffer
 	logger := log.New(&buf, "logger: ", log.Lshortfile)
 	logger.Print("Hello, log file!")
-	// Mongo
-	mongoDBDialInfo := &mgo.DialInfo{
-		Addrs:    []string{"localhost"},
-		Timeout:  60 * time.Second,
-		Database: "gopimbay",
-		Username: "gopimbay",
-		Password: "gopimbay",
-	}
-	session, err := mgo.DialWithInfo(mongoDBDialInfo)
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	//ensureIndex(session)
+
+	DB, _ = model.NewMongoDB("localhost", "gopimbay", "gopimbay", "gopimbay", "user")
+	//DB, err = configureDatastoreDB()
+
 	//Fin Mongo
 	defer glog.Flush()
 
@@ -54,9 +46,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/signin", use(web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
-	router.HandleFunc("/signup", web.SignupNewUserEndpoint(session)).Methods("POST")
+	router.HandleFunc("/signup", web.SignupNewUserEndpoint(DB)).Methods("POST")
 
-	router.HandleFunc("/account", use(web.CreateAccountEndpoint(session), web.ValidateToken)).Methods("POST")
+	router.HandleFunc("/account", use(web.CreateAccountEndpoint(DB), web.ValidateToken)).Methods("POST")
 
 	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
 

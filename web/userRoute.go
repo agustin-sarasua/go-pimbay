@@ -5,18 +5,15 @@ import (
 	"net/http"
 
 	"github.com/agustin-sarasua/pimbay/api"
+	"github.com/agustin-sarasua/pimbay/model"
 
 	"fmt"
 
 	"github.com/agustin-sarasua/pimbay/service"
-	mgo "gopkg.in/mgo.v2"
 )
 
-func SignupNewUserEndpoint(s *mgo.Session) func(w http.ResponseWriter, req *http.Request) {
+func SignupNewUserEndpoint(db model.UserDatabase) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		session := s.Copy()
-		defer session.Close()
-
 		var msg api.SignupUserRestMsg
 		err := json.NewDecoder(req.Body).Decode(&msg)
 
@@ -25,7 +22,7 @@ func SignupNewUserEndpoint(s *mgo.Session) func(w http.ResponseWriter, req *http
 			return
 		}
 
-		service.SignupNewUser(s, &msg)
+		service.SignupNewUser(db, &msg)
 		w.Header().Set("Content-Type", "application/json")
 
 		w.WriteHeader(http.StatusCreated)

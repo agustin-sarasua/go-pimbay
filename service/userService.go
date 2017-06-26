@@ -4,11 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-
-	mgo "gopkg.in/mgo.v2"
-
 	"time"
 
 	"github.com/agustin-sarasua/pimbay/api"
@@ -22,7 +18,7 @@ const (
 	userCollection         = "user"
 )
 
-func SignupNewUser(s *mgo.Session, m *api.SignupUserRestMsg) api.SignUpResponse {
+func SignupNewUser(db model.UserDatabase, m *api.SignupUserRestMsg) api.SignUpResponse {
 	fmt.Println("SignUp new User")
 	jsonValue, _ := json.Marshal(api.SignUpRequest{Email: m.Email, Password: m.Password, ReturnSecureToken: true})
 	resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
@@ -36,11 +32,8 @@ func SignupNewUser(s *mgo.Session, m *api.SignupUserRestMsg) api.SignUpResponse 
 		panic(err)
 	}
 	u := model.User{ID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
-	ch := saveUser(s, &u)
-	ok := <-ch
-	if !ok {
-		fmt.Println("Could not save user")
-	}
+	db.SaveUser(&u)
+
 	fmt.Println(r)
 	return r
 }
@@ -81,28 +74,6 @@ func GetAccountInfo(tkn string) <-chan *api.AccountInfoReponse {
 			panic(err)
 		}
 		out <- &r
-	}()
-	return out
-}
-
-func saveUser(s *mgo.Session, u *model.User) <-chan bool {
-	out := make(chan bool)
-	//defer finally()
-	go func() {
-		session := s.Copy()
-		defer session.Close()
-
-		c := session.DB(dbName).C(userCollection)
-		err := c.Insert(u)
-		if err != nil {
-			if mgo.IsDup(err) {
-				panic(err)
-			}
-			log.Println("Failed insert User: ", err)
-			out <- false
-		} else {
-			out <- true
-		}
 	}()
 	return out
 }

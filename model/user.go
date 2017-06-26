@@ -14,13 +14,6 @@ type User struct {
 	Sex         string    `json:"sex,omitempty" bson:"sex,omitempty"`
 }
 
-type Account struct {
-	ID          string        `json:"id,omitempty" bson:"_id"`
-	Name        string        `json:"name" bson:"name"`
-	CreatedDate time.Time     `json:"createdDate,omitempty" bson:"createdDate"`
-	CreditCards []*CreditCard `json:"creditCards,omitempty" bson:"creditCards"`
-}
-
 type CreditCard struct {
 	ID         string `json:"id" bson:"_id"`
 	Bin        string `json:"bin" bson:"bin"`
@@ -38,65 +31,6 @@ type CreditCard struct {
 	CreatedDate time.Time `json:"createdDate" bson:"createdDate"`
 }
 
-/*
-
-Number struct {
-		Length int `json:"length"`
-		Luhn bool `json:"luhn"`
-	} `json:"number"`
-	Scheme string `json:"scheme"`
-	Type string `json:"type"`
-	Brand string `json:"brand"`
-	Prepaid bool `json:"prepaid"`
-	Country struct {
-		Numeric string `json:"numeric"`
-		Alpha2 string `json:"alpha2"`
-		Name string `json:"name"`
-		Emoji string `json:"emoji"`
-		Currency string `json:"currency"`
-		Latitude int `json:"latitude"`
-		Longitude int `json:"longitude"`
-	} `json:"country"`
-
-
-*/
-
-/*
-type Account struct {
-	ID          string
-	Name        string
-	CreatedDate util.DateTime
-	Country     string
-	CreditCards *[]CreditCard
-	Expenses    *[]Expense
+type UserDatabase interface {
+	SaveUser(u *User) (id string, e error)
 }
-
-type CreditCard struct {
-	ID         string
-	LastDigits string
-	Bin        string
-	Bank       string
-}
-
-type Expense struct {
-	ID          string
-	Amount      util.BigDecimal
-	Currency    string
-	DateTime    util.DateTime
-	Report      *Report
-	IndexedDate util.DateTime
-	Category    string
-	Business    *Business
-}
-
-type Business struct {
-	ID         string
-	BusinessID string
-	Name       string
-	Category   string
-	Address    *Address
-}
-
-type Address struct {
-}
-*/
