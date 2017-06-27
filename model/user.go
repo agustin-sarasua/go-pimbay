@@ -33,4 +33,5 @@ type CreditCard struct {
 
 type UserDatabase interface {
 	SaveUser(u *User) (id string, e error)
+	Close()
 }

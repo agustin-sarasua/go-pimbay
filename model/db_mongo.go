@@ -30,7 +30,7 @@ func NewMongoDB(addr, db, username, pwd, c string) (UserDatabase, error) {
 	if err != nil {
 		panic(err)
 	}
-	defer session.Close()
+	//defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
 
 	return &mongoDB{conn: session}, nil

@@ -1,0 +1,6 @@
+runtime: go
+env: flex
+api_version: 1
+
+env_variables:
+  OAUTH2_CALLBACK: https://pimbay-accounting.appspot.com/oauth2callback

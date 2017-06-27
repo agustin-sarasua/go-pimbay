@@ -39,3 +39,8 @@ func (db *datastoreDB) SaveUser(b *User) (id string, err error) {
 	}
 	return k.String(), nil
 }
+
+// Close closes the database.
+func (db *datastoreDB) Close() {
+	// No op.
+}

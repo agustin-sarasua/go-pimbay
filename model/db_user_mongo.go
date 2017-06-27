@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -11,7 +12,6 @@ const (
 
 // Ensure mongoDB conforms to the UserDatabase interface.
 var _ UserDatabase = &mongoDB{}
-
 
 func (db *mongoDB) SaveUser(u *User) (id string, e error) {
 	session := db.conn.Copy()
@@ -26,4 +26,9 @@ func (db *mongoDB) SaveUser(u *User) (id string, e error) {
 		log.Println("Failed insert User: ", err)
 	}
 	return u.ID, nil
+}
+
+// Close closes the database.
+func (db *mongoDB) Close() {
+	db.conn.Close()
 }
