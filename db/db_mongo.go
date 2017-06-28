@@ -1,8 +1,9 @@
-package model
+package db
 
 import (
 	"time"
 
+	"github.com/agustin-sarasua/pimbay/model"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -15,9 +16,9 @@ type mongoDB struct {
 }
 
 // Ensure mongoDB conforms to the UserDatabase interface.
-var _ UserDatabase = &mongoDB{}
+var _ model.UserDatabase = &mongoDB{}
 
-func NewMongoDB(addr, db, username, pwd, c string) (UserDatabase, error) {
+func NewMongoDB(addr, db, username, pwd, c string) (model.UserDatabase, error) {
 	// Mongo
 	mongoDBDialInfo := &mgo.DialInfo{
 		Addrs:    []string{addr},

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/agustin-sarasua/pimbay/api"
+	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/model"
 )
 
@@ -18,23 +19,22 @@ const (
 	userCollection         = "user"
 )
 
-func SignupNewUser(db model.UserDatabase, m *api.SignupUserRestMsg) api.SignUpResponse {
+func SignupNewUser(db db.UserDatabase, m *api.SignupUserRestMsg) api.SignUpResponse {
 	fmt.Println("SignUp new User")
 	jsonValue, _ := json.Marshal(api.SignUpRequest{Email: m.Email, Password: m.Password, ReturnSecureToken: true})
 	resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
 	if err != nil {
 		panic(err)
 	}
-
+	fmt.Println(resp)
 	var r api.SignUpResponse
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		panic(err)
 	}
-	u := model.User{ID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
-	db.SaveUser(&u)
-
-	fmt.Println(r)
+	u := model.User{FirebaseID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
+	id, _ := db.SaveUser(&u)
+	u.ID = id
 	return r
 }
 

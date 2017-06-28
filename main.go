@@ -13,6 +13,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 
+	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/model"
 	"github.com/agustin-sarasua/pimbay/web"
 	"github.com/golang/glog"
@@ -21,7 +22,8 @@ import (
 )
 
 var (
-	DB model.UserDatabase
+	DB         db.UserDatabase
+	DBAccounts db.AccountDatabase
 )
 
 func usage() {
@@ -54,7 +56,7 @@ func main() {
 
 	router.HandleFunc("/signin", use(web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
 	router.HandleFunc("/signup", web.SignupNewUserEndpoint(DB)).Methods("POST")
-
+	router.HandleFunc("/user/{id:[0-9]+}", web.GetUser(DB)).Methods("GET")
 	router.HandleFunc("/account", use(web.CreateAccountEndpoint(DB), web.ValidateToken)).Methods("POST")
 
 	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
@@ -83,5 +85,5 @@ func configureDatastoreDB(projectID string) (model.UserDatabase, error) {
 	if err != nil {
 		return nil, err
 	}
-	return model.NewDatastoreDB(client)
+	return db.NewDatastoreDB(client)
 }

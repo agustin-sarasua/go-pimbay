@@ -5,7 +5,8 @@ import (
 )
 
 type User struct {
-	ID          string    `json:"id" bson:"_id"`
+	ID          int64     `json:"id" bson:"_id"`
+	FirebaseID  string    `json:"firebaseID" bson:"firebaseID"`
 	Name        string    `json:"name" bson:"name"`
 	LastName    string    `json:"lastName" bson:"lastName"`
 	Email       string    `json:"email" bson:"email"`
@@ -32,6 +33,7 @@ type CreditCard struct {
 }
 
 type UserDatabase interface {
-	SaveUser(u *User) (id string, e error)
+	SaveUser(u *User) (id int64, e error)
+	GetUser(id int64) (*User, error)
 	Close()
 }

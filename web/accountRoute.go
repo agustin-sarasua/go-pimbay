@@ -6,10 +6,11 @@ import (
 
 	"time"
 
+	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/model"
 )
 
-func CreateAccountEndpoint(db model.UserDatabase) func(w http.ResponseWriter, req *http.Request) {
+func CreateAccountEndpoint(db db.UserDatabase) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var msg model.Account
 		err := json.NewDecoder(req.Body).Decode(&msg)
