@@ -23,6 +23,7 @@ func usage() {
 }
 
 func main() {
+	fmt.Println("Running main...")
 	var buf bytes.Buffer
 	logger := log.New(&buf, "logger: ", log.Lshortfile)
 	logger.Print("Hello, log file!")

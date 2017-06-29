@@ -7,15 +7,19 @@ import (
 	"os"
 
 	"cloud.google.com/go/datastore"
+	"github.com/agustin-sarasua/pimbay/api"
 	"github.com/agustin-sarasua/pimbay/db"
 )
 
 var (
-	DB db.Database
+	DB    db.Database
+	FbAPI api.FirebaseAPI
 )
 
 func init() {
+	fmt.Println("Running init...")
 	DB, _ = configureDatastoreDB("pimbay-accounting")
+	FbAPI = api.NewFirebaseAPI()
 	flag.Usage = usage
 	// NOTE: This next line is key you have to call flag.Parse() for the command line
 	// options or "flags" that are defined in the glog module to be picked up.

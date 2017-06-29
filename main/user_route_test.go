@@ -2,17 +2,21 @@ package main_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/agustin-sarasua/pimbay/api"
 	"github.com/agustin-sarasua/pimbay/main"
+	"github.com/agustin-sarasua/pimbay/model"
 
 	"bytes"
 
+	"github.com/agustin-sarasua/pimbay"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/aetest"
+	"google.golang.org/appengine/datastore"
 )
 
 func TestSignupNewUser(t *testing.T) {
@@ -21,7 +25,7 @@ func TestSignupNewUser(t *testing.T) {
 		t.Fatalf("Failed to create instance: %v", err)
 	}
 	defer inst.Close()
-	jsonValue, _ := json.Marshal(api.SignupUserRestMsg{Name: "Agustin", LastName: "Sarasua", Email: "test2@test.com", Password: "pwdTest1234"})
+	jsonValue, _ := json.Marshal(api.SignupUserRestMsg{Name: "Agustin", LastName: "Sarasua", Email: "test@test.com", Password: "pwdTest1234"})
 	req, err := inst.NewRequest("POST", "/signup", bytes.NewBuffer(jsonValue))
 	if err != nil {
 		t.Fatalf("Failed to create req1: %v", err)
@@ -33,12 +37,19 @@ func TestSignupNewUser(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
-	// c1 := appengine.NewContext(req1)
+	q := datastore.NewQuery("User")
 
-	// req2, err := inst.NewRequest("GET", "/herons", nil)
-	// if err != nil {
-	// 	t.Fatalf("Failed to create req2: %v", err)
-	// }
-	// c2 := appengine.NewContext(req2)
+	var r []*model.User
 
+	q.GetAll(c1, &r)
+
+	if len(r) != 1 {
+		t.Errorf("Mal")
+	}
+
+}
+
+func init() {
+	fmt.Println("Running init test...")
+	pimbay.FbAPI = api.NewFirebaseMockedAPI()
 }

@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/api"
 	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/model"
@@ -23,6 +24,7 @@ const (
 
 func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) api.SignUpResponse {
 	fmt.Println("SignUp new User")
+	pimbay.FbAPI.Signin()
 	jsonValue, _ := json.Marshal(api.SignUpRequest{Email: m.Email, Password: m.Password, ReturnSecureToken: true})
 	resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
 	if err != nil {
