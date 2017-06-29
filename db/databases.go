@@ -18,6 +18,7 @@ type Database interface {
 	SaveUser(ctx context.Context, u *model.User) (id int64, e error)
 	GetUser(ctx context.Context, id int64) (*model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
+	DeleteUser(id int64) error
 	Close()
 
 	SaveAccount(ctx context.Context, a *model.Account, uid int64) (id int64, e error)

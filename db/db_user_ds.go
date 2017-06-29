@@ -32,8 +32,17 @@ func (db *datastoreDB) GetUser(ctx context.Context, id int64) (*model.User, erro
 func (db *datastoreDB) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	q := datastore.NewQuery("User").Filter("Email =", email)
 	var us []*model.User
-	db.client.GetAll(ctx, q, &us)
-	return us[0], nil
+	ks, _ := db.client.GetAll(ctx, q, &us)
+	if ks != nil && len(ks) > 0 {
+		us[0].ID = ks[0].ID
+		return us[0], nil
+	}
+	return nil, nil
+}
+
+func (db *datastoreDB) DeleteUser(id int64) error {
+	ctx := context.Background()
+	return db.client.Delete(ctx, datastore.IDKey("User", id, nil))
 }
 
 // Close closes the database.

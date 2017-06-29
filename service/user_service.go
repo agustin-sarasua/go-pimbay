@@ -17,25 +17,14 @@ import (
 
 const (
 	signInEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
-	signUpEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
 	getAccountInfoEndpoint = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
 	userCollection         = "user"
 )
 
-func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) api.SignUpResponse {
+func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) *api.SignUpResponse {
 	fmt.Println("SignUp new User")
-	pimbay.FbAPI.Signin()
-	jsonValue, _ := json.Marshal(api.SignUpRequest{Email: m.Email, Password: m.Password, ReturnSecureToken: true})
-	resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(resp)
-	var r api.SignUpResponse
-	err = json.NewDecoder(resp.Body).Decode(&r)
-	if err != nil {
-		panic(err)
-	}
+	r := pimbay.FbAPI.Signup(m.Email, m.Password, true)
+
 	u := model.User{FirebaseID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
 	id, _ := db.SaveUser(context.Background(), &u)
 	u.ID = id

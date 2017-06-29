@@ -1,13 +1,9 @@
 package api
 
-import (
-	"fmt"
-)
-
 const (
-	SignInEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
-	SignUpEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
-	GetAccountInfoEndpoint = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
+	signInEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
+	signUpEndpoint         = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
+	getAccountInfoEndpoint = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key=AIzaSyAkR4u8iQBLckmYNtWSx9fmJNSilyWc__A"
 )
 
 type SignUpRequest struct {
@@ -46,25 +42,5 @@ type AccountInfoReponse struct {
 
 type FirebaseAPI interface {
 	Signin()
-	// Signup()
-	// GetAccountInfo()
-}
-
-type firebaseAPI struct{}
-type firebaseMockedAPI struct{}
-
-func (f *firebaseAPI) Signin() {
-	fmt.Println("Real FirebaseAPI")
-}
-
-func (f *firebaseMockedAPI) Signin() {
-	fmt.Println("Mocked FirebaseAPI")
-}
-
-func NewFirebaseAPI() FirebaseAPI {
-	return &firebaseAPI{}
-}
-
-func NewFirebaseMockedAPI() FirebaseAPI {
-	return &firebaseMockedAPI{}
+	Signup(u, p string, rs bool) *SignUpResponse
 }
