@@ -1,4 +1,4 @@
-package web
+package main
 
 import (
 	"fmt"
@@ -15,4 +15,8 @@ func ResponseWithJSON(w http.ResponseWriter, json []byte, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
 	w.Write(json)
+}
+
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
 }

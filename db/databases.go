@@ -1,24 +1,28 @@
 package db
 
 import (
-	"context"
 	"fmt"
+
+	"cloud.google.com/go/datastore"
+
+	"golang.org/x/net/context"
 
 	mgo "gopkg.in/mgo.v2"
 
-	"cloud.google.com/go/datastore"
+	//"cloud.google.com/go/datastore"
+
 	"github.com/agustin-sarasua/pimbay/model"
 )
 
 type Database interface {
-	SaveUser(u *model.User) (id int64, e error)
-	GetUser(id int64) (*model.User, error)
-	GetUserByEmail(email string) (*model.User, error)
+	SaveUser(ctx context.Context, u *model.User) (id int64, e error)
+	GetUser(ctx context.Context, id int64) (*model.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
 	Close()
 
-	SaveAccount(a *model.Account, uid int64) (id int64, e error)
-	GetAccount(id int64) (*model.Account, error)
-	ListUserAccounts(uid int64) (as []*model.Account, err error)
+	SaveAccount(ctx context.Context, a *model.Account, uid int64) (id int64, e error)
+	GetAccount(ctx context.Context, id int64) (*model.Account, error)
+	ListUserAccounts(ctx context.Context, uid int64) (as []*model.Account, err error)
 }
 
 /**
@@ -68,8 +72,7 @@ var _ Database = &datastoreDB{}
 
 // See the datastore and google packages for details on creating a suitable Client:
 // https://godoc.org/cloud.google.com/go/datastore
-func NewDatastoreDB(client *datastore.Client) (Database, error) {
-	ctx := context.Background()
+func NewDatastoreDB(ctx context.Context, client *datastore.Client) (Database, error) {
 	// Verify that we can communicate and authenticate with the datastore service.
 	t, err := client.NewTransaction(ctx)
 	if err != nil {

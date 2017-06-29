@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/net/context"
+
 	"github.com/agustin-sarasua/pimbay/api"
 	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/model"
@@ -33,7 +35,7 @@ func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) api.SignUpResponse 
 		panic(err)
 	}
 	u := model.User{FirebaseID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
-	id, _ := db.SaveUser(&u)
+	id, _ := db.SaveUser(context.Background(), &u)
 	u.ID = id
 	return r
 }

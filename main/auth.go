@@ -1,17 +1,19 @@
-package web
+package main
 
 import (
 	"encoding/base64"
 	"net/http"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"fmt"
 
-	"github.com/agustin-sarasua/pimbay/db"
+	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/service"
 )
 
-func ValidateToken(db db.Database, h http.HandlerFunc) http.HandlerFunc {
+func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
@@ -28,14 +30,14 @@ func ValidateToken(db db.Database, h http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
-		u, _ := db.GetUserByEmail(rs.Users[0].Email)
+		u, _ := pimbay.DB.GetUserByEmail(context.Background(), rs.Users[0].Email)
 		fmt.Println(u)
 
 		h.ServeHTTP(w, r)
 	}
 }
 
-func BasicAuth(db db.Database, h http.HandlerFunc) http.HandlerFunc {
+func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)

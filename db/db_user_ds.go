@@ -1,15 +1,15 @@
 package db
 
 import (
-	"context"
 	"fmt"
+
+	"golang.org/x/net/context"
 
 	"cloud.google.com/go/datastore"
 	"github.com/agustin-sarasua/pimbay/model"
 )
 
-func (db *datastoreDB) SaveUser(b *model.User) (id int64, err error) {
-	ctx := context.Background()
+func (db *datastoreDB) SaveUser(ctx context.Context, b *model.User) (id int64, err error) {
 	k := datastore.IncompleteKey("User", nil)
 	k, err = db.client.Put(ctx, k, b)
 	if err != nil {
@@ -19,8 +19,7 @@ func (db *datastoreDB) SaveUser(b *model.User) (id int64, err error) {
 	return k.ID, nil
 }
 
-func (db *datastoreDB) GetUser(id int64) (*model.User, error) {
-	ctx := context.Background()
+func (db *datastoreDB) GetUser(ctx context.Context, id int64) (*model.User, error) {
 	k := datastore.IDKey("User", id, nil)
 	u := &model.User{}
 	if err := db.client.Get(ctx, k, u); err != nil {
@@ -30,8 +29,7 @@ func (db *datastoreDB) GetUser(id int64) (*model.User, error) {
 	return u, nil
 }
 
-func (db *datastoreDB) GetUserByEmail(email string) (*model.User, error) {
-	ctx := context.Background()
+func (db *datastoreDB) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
 	q := datastore.NewQuery("User").Filter("Email =", email)
 	var us []*model.User
 	db.client.GetAll(ctx, q, &us)
