@@ -31,9 +31,3 @@ type CreditCard struct {
 	CountryCode string    `json:"countryCode" bson:"countryCode"`
 	CreatedDate time.Time `json:"createdDate" bson:"createdDate"`
 }
-
-type UserDatabase interface {
-	SaveUser(u *User) (id int64, e error)
-	GetUser(id int64) (*User, error)
-	Close()
-}

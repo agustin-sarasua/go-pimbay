@@ -14,7 +14,6 @@ import (
 	"cloud.google.com/go/datastore"
 
 	"github.com/agustin-sarasua/pimbay/db"
-	"github.com/agustin-sarasua/pimbay/model"
 	"github.com/agustin-sarasua/pimbay/web"
 	"github.com/golang/glog"
 	"github.com/gorilla/handlers"
@@ -22,8 +21,7 @@ import (
 )
 
 var (
-	DB         db.UserDatabase
-	DBAccounts db.AccountDatabase
+	DB db.Database
 )
 
 func usage() {
@@ -54,12 +52,15 @@ func main() {
 	//Gorilla MUX
 	router := mux.NewRouter()
 
-	router.HandleFunc("/signin", use(web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
+	router.HandleFunc("/signin", use(DB, web.SigninUserEndpoint, web.BasicAuth)).Methods("POST")
 	router.HandleFunc("/signup", web.SignupNewUserEndpoint(DB)).Methods("POST")
 	router.HandleFunc("/user/{id:[0-9]+}", web.GetUser(DB)).Methods("GET")
-	router.HandleFunc("/account", use(web.CreateAccountEndpoint(DB), web.ValidateToken)).Methods("POST")
 
-	router.HandleFunc("/hello", use(web.GetAccountInfo, web.ValidateToken)).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}/accounts", web.GetUser(DB)).Methods("GET")
+
+	router.HandleFunc("/account", use(DB, web.CreateAccountEndpoint(DB), web.ValidateToken)).Methods("POST")
+
+	router.HandleFunc("/hello", use(DB, web.GetAccountInfo, web.ValidateToken)).Methods("GET")
 
 	router.Methods("GET").Path("/_ah/health").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -72,14 +73,14 @@ func main() {
 	//log.Fatal(http.ListenAndServe(":12345", router))
 }
 
-func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
+func use(db db.Database, h http.HandlerFunc, middleware ...func(db.Database, http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	for _, m := range middleware {
-		h = m(h)
+		h = m(db, h)
 	}
 	return h
 }
 
-func configureDatastoreDB(projectID string) (model.UserDatabase, error) {
+func configureDatastoreDB(projectID string) (db.Database, error) {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {

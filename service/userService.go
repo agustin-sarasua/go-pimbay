@@ -19,7 +19,7 @@ const (
 	userCollection         = "user"
 )
 
-func SignupNewUser(db db.UserDatabase, m *api.SignupUserRestMsg) api.SignUpResponse {
+func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) api.SignUpResponse {
 	fmt.Println("SignUp new User")
 	jsonValue, _ := json.Marshal(api.SignUpRequest{Email: m.Email, Password: m.Password, ReturnSecureToken: true})
 	resp, err := http.Post(signUpEndpoint, applicationContent, bytes.NewBuffer(jsonValue))

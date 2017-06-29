@@ -10,7 +10,7 @@ import (
 	"github.com/agustin-sarasua/pimbay/model"
 )
 
-func CreateAccountEndpoint(db db.UserDatabase) func(w http.ResponseWriter, req *http.Request) {
+func CreateAccountEndpoint(db db.Database) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var msg model.Account
 		err := json.NewDecoder(req.Body).Decode(&msg)
@@ -25,5 +25,11 @@ func CreateAccountEndpoint(db db.UserDatabase) func(w http.ResponseWriter, req *
 
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(msg)
+	}
+}
+
+func ListUserAccountsEndpoint(db db.Database) func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) {
+
 	}
 }

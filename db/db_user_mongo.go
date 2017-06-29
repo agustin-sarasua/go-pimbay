@@ -13,7 +13,7 @@ const (
 )
 
 // Ensure mongoDB conforms to the UserDatabase interface.
-var _ UserDatabase = &mongoDB{}
+//var _ UserDatabase = &mongoDB{}
 
 func (db *mongoDB) SaveUser(u *model.User) (id int64, e error) {
 	session := db.conn.Copy()

@@ -14,7 +14,7 @@ import (
 	"github.com/agustin-sarasua/pimbay/service"
 )
 
-func GetUser(db db.UserDatabase) func(w http.ResponseWriter, r *http.Request) {
+func GetUser(db db.Database) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		id, err := strconv.ParseInt(mux.Vars(req)["id"], 10, 64)
 		if err != nil {
@@ -30,7 +30,7 @@ func GetUser(db db.UserDatabase) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignupNewUserEndpoint(db db.UserDatabase) func(w http.ResponseWriter, req *http.Request) {
+func SignupNewUserEndpoint(db db.Database) func(w http.ResponseWriter, req *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var msg api.SignupUserRestMsg
 		err := json.NewDecoder(req.Body).Decode(&msg)

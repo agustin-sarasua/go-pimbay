@@ -5,10 +5,13 @@ import (
 	"net/http"
 	"strings"
 
+	"fmt"
+
+	"github.com/agustin-sarasua/pimbay/db"
 	"github.com/agustin-sarasua/pimbay/service"
 )
 
-func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
+func ValidateToken(db db.Database, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
@@ -25,11 +28,14 @@ func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
+		u, _ := db.GetUserByEmail(rs.Users[0].Email)
+		fmt.Println(u)
+
 		h.ServeHTTP(w, r)
 	}
 }
 
-func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
+func BasicAuth(db db.Database, h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)

@@ -33,11 +33,3 @@ func PrintValidReportLines(r model.Report) {
 		fmt.Println(t, " ", ld, " ", bn, " ", c, a)
 	}
 }
-
-func ProcessUserReport(path string) {
-
-}
-
-func saveUserReport() {
-
-}
