@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"cloud.google.com/go/datastore"
-	"github.com/agustin-sarasua/pimbay/api"
-	"github.com/agustin-sarasua/pimbay/db"
+	"github.com/agustin-sarasua/pimbay/app/api"
+	"github.com/agustin-sarasua/pimbay/app/db"
 )
 
 var (
@@ -27,6 +27,17 @@ func init() {
 }
 
 func configureDatastoreDB(projectID string) (db.Database, error) {
+	// export DATASTORE_DATASET=pimbay-accounting
+	// export DATASTORE_EMULATOR_HOST=localhost:8081
+	// export DATASTORE_EMULATOR_HOST_PATH=localhost:8081/datastore
+	// export DATASTORE_HOST=http://localhost:8081
+	// export DATASTORE_PROJECT_ID=pimbay-accounting
+	os.Setenv("DATASTORE_DATASET", "pimbay-accounting")
+	os.Setenv("DATASTORE_EMULATOR_HOST", "localhost:8081")
+	os.Setenv("DATASTORE_EMULATOR_HOST_PATH", "localhost:8081/datastore")
+	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
+	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
+
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
