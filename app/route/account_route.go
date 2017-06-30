@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/agustin-sarasua/pimbay/app/model"
+	"github.com/agustin-sarasua/pimbay/app/service"
 )
 
 func CreateAccountEndpoint(w http.ResponseWriter, req *http.Request) {
@@ -18,7 +19,7 @@ func CreateAccountEndpoint(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	msg.CreatedDate = time.Now()
-	//service.SaveAccount(s, &msg)
+	service.CreateAccount(s, &msg)
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusCreated)

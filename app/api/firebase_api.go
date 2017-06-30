@@ -42,5 +42,5 @@ type AccountInfoReponse struct {
 
 type FirebaseAPI interface {
 	Signin()
-	Signup(u, p string, rs bool) *SignUpResponse
+	Signup(e, p string, rs bool) (*SignUpResponse, error)
 }

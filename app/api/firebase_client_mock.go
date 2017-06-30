@@ -8,8 +8,8 @@ func (f *firebaseMockedAPI) Signin() {
 	fmt.Println("Mocked FirebaseAPI")
 }
 
-func (f *firebaseMockedAPI) Signup(u, p string, rs bool) *SignUpResponse {
-	return &SignUpResponse{}
+func (f *firebaseMockedAPI) Signup(e, p string, rs bool) (*SignUpResponse, error) {
+	return &SignUpResponse{}, nil
 }
 
 func NewFirebaseMockedAPI() FirebaseAPI {
