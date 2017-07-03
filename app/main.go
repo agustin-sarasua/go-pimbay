@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,12 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
 )
-
-func usage() {
-	fmt.Fprintf(os.Stderr, "usage: example -stderrthreshold=[INFO|WARN|FATAL] -log_dir=[string]\n")
-	flag.PrintDefaults()
-	os.Exit(2)
-}
 
 func main() {
 	fmt.Println("Running main...")
