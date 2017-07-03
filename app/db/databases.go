@@ -24,6 +24,8 @@ type Database interface {
 	SaveAccount(ctx context.Context, a *model.Account, uid int64) (id int64, e error)
 	GetAccount(ctx context.Context, id int64) (*model.Account, error)
 	ListUserAccounts(ctx context.Context, uid int64) (as []*model.Account, err error)
+
+	Cleanup()
 }
 
 /**
@@ -85,4 +87,14 @@ func NewDatastoreDB(ctx context.Context, client *datastore.Client) (Database, er
 	return &datastoreDB{
 		client: client,
 	}, nil
+}
+
+func (db *datastoreDB) Cleanup() {
+	fmt.Println("Cleaning up datastore...")
+	ctx := context.Background()
+	q := datastore.NewQuery("User")
+	var usersData []*model.User
+	ks, _ := db.client.GetAll(ctx, q, &usersData)
+	db.client.DeleteMulti(ctx, ks)
+	fmt.Println("Datastore cleaned up")
 }

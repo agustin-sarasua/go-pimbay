@@ -23,7 +23,7 @@ const (
 
 func SignupNewUser(db db.Database, m *api.SignupUserRestMsg) *api.SignUpResponse {
 	fmt.Println("SignUp new User")
-	r := pimbay.FbAPI.Signup(m.Email, m.Password, true)
+	r, _ := pimbay.FbAPI.Signup(m.Email, m.Password, true)
 
 	u := model.User{FirebaseID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
 	id, _ := db.SaveUser(context.Background(), &u)

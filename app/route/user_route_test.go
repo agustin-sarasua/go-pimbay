@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+
+	"cloud.google.com/go/datastore"
 
 	"golang.org/x/net/context"
 
 	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/app/api"
+	"github.com/agustin-sarasua/pimbay/app/db"
 	"github.com/agustin-sarasua/pimbay/app/route"
 )
 
@@ -29,14 +33,12 @@ func TestSignupNewUser(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 	r, _ := pimbay.DB.GetUserByEmail(c1, testEmail)
-
 	if r == nil {
 		t.Errorf("The user has not signed up")
 	}
-	err = pimbay.DB.DeleteUser(r.ID)
-	if err != nil {
-		t.Fatalf("Failed to delete user: %v", err)
-	}
+
+	pimbay.DB.Cleanup()
+
 	r, err = pimbay.DB.GetUserByEmail(c1, testEmail)
 	if err != nil {
 		t.Fatalf("Failed to getting user: %v", err)
@@ -46,7 +48,20 @@ func TestSignupNewUser(t *testing.T) {
 
 func init() {
 	fmt.Println("Running init test...")
+	os.Setenv("DATASTORE_DATASET", "pimbay-accounting")
+	os.Setenv("DATASTORE_EMULATOR_HOST", "localhost:8081")
+	os.Setenv("DATASTORE_EMULATOR_HOST_PATH", "localhost:8081/datastore")
+	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
+	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	pimbay.FbAPI = api.NewFirebaseMockedAPI()
+	pimbay.DB, _ = configureDatastoreDB("pimbay-accounting")
+}
 
-	//pimbay.DB =
+func configureDatastoreDB(projectID string) (db.Database, error) {
+	ctx := context.Background()
+	client, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	return db.NewDatastoreDB(ctx, client)
 }

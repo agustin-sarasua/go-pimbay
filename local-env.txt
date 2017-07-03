@@ -1,1 +1,3 @@
 gcloud beta emulators datastore start --data-dir $GOPATH/src/github.com/agustin-sarasua/pimbay/data
+
+dev_appserver.py app.yaml
