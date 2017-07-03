@@ -5,11 +5,10 @@
 
 indexes:
 
-# This index enables filtering by "CreatedByID" and sort by "Title".
 - kind: User
+  ancestor: no
   properties:
   - name: FirebaseID
   - name: Email
-    direction: asc
   - name: CreatedDate
     direction: asc
