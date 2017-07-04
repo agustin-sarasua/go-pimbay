@@ -40,6 +40,17 @@ func (db *datastoreDB) GetUserByEmail(ctx context.Context, email string) (*model
 	return nil, nil
 }
 
+func (db *datastoreDB) GetUserByFirebaseID(ctx context.Context, fID string) (*model.User, error) {
+	q := datastore.NewQuery("User").Filter("FirebaseID =", fID)
+	var us []*model.User
+	ks, _ := db.client.GetAll(ctx, q, &us)
+	if ks != nil && len(ks) > 0 {
+		us[0].ID = ks[0].ID
+		return us[0], nil
+	}
+	return nil, nil
+}
+
 func (db *datastoreDB) DeleteUser(id int64) error {
 	ctx := context.Background()
 	return db.client.Delete(ctx, datastore.IDKey("User", id, nil))

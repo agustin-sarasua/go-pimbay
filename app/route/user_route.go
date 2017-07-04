@@ -54,5 +54,8 @@ func SigninUserEndpoint(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetAccountInfo(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	uid := ctx.Value(999)
+	fmt.Println("User Id: ", uid)
 	fmt.Println("Hello")
 }

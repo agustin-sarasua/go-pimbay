@@ -18,6 +18,11 @@ var (
 
 func init() {
 	fmt.Println("Running init...")
+	os.Setenv("DATASTORE_DATASET", "pimbay-accounting")
+	os.Setenv("DATASTORE_EMULATOR_HOST", "localhost:8081")
+	os.Setenv("DATASTORE_EMULATOR_HOST_PATH", "localhost:8081/datastore")
+	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
+	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	DB, _ = configureDatastoreDB("pimbay-accounting")
 	FbAPI = api.NewFirebaseAPI()
 	flag.Usage = usage

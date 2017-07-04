@@ -33,10 +33,10 @@ type AccountInfoReponse struct {
 			Email       string `json:"email"`
 			RawID       string `json:"rawId"`
 		} `json:"providerUserInfo"`
-		PasswordHash      string `json:"passwordHash"`
-		PasswordUpdatedAt int64  `json:"passwordUpdatedAt"`
-		ValidSince        string `json:"validSince"`
-		CreatedAt         string `json:"createdAt"`
+		PasswordHash      string  `json:"passwordHash"`
+		PasswordUpdatedAt float64 `json:"passwordUpdatedAt,omitempty"`
+		ValidSince        string  `json:"validSince"`
+		CreatedAt         string  `json:"createdAt"`
 	} `json:"users"`
 }
 

@@ -26,7 +26,7 @@ func main() {
 	defer pimbay.DB.Close()
 
 	defer glog.Flush()
-	startServer()
+	StartServer()
 	fmt.Println("Hello there...")
 	//log.Fatal(http.ListenAndServe(":12345", router))
 }

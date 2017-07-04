@@ -13,6 +13,8 @@ import (
 	"github.com/agustin-sarasua/pimbay/app/service"
 )
 
+const userIdKey = 999
+
 func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -30,7 +32,10 @@ func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
-		u, _ := pimbay.DB.GetUserByEmail(context.Background(), rs.Users[0].Email)
+		u, _ := pimbay.DB.GetUserByFirebaseID(context.Background(), rs.Users[0].LocalID)
+
+		ctx := context.WithValue(context.Background(), userIdKey, u.ID)
+		r = r.WithContext(ctx)
 		fmt.Println(u)
 
 		h.ServeHTTP(w, r)
