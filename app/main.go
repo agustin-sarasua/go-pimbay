@@ -26,7 +26,12 @@ func main() {
 	defer pimbay.DB.Close()
 
 	defer glog.Flush()
+	startServer()
+	fmt.Println("Hello there...")
+	//log.Fatal(http.ListenAndServe(":12345", router))
+}
 
+func StartServer() {
 	//Gorilla MUX
 	router := mux.NewRouter()
 
@@ -44,8 +49,6 @@ func main() {
 
 	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, router))
 	appengine.Main()
-	fmt.Println("Hello there...")
-	//log.Fatal(http.ListenAndServe(":12345", router))
 }
 
 func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {

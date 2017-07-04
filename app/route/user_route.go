@@ -18,12 +18,13 @@ import (
 
 func GetUser(w http.ResponseWriter, req *http.Request) {
 	id, err := strconv.ParseInt(mux.Vars(req)["id"], 10, 64)
+	fmt.Printf("Getting User %d...", id)
 	if err != nil {
 		fmt.Errorf("bad user id: %v", err)
 		return
 	}
 	u, err := pimbay.DB.GetUser(context.Background(), id)
-
+	fmt.Println(u)
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusCreated)

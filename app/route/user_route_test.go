@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 
 	"cloud.google.com/go/datastore"
@@ -16,7 +17,10 @@ import (
 	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/app/api"
 	"github.com/agustin-sarasua/pimbay/app/db"
+	"github.com/agustin-sarasua/pimbay/app/model"
 	"github.com/agustin-sarasua/pimbay/app/route"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func TestSignupNewUser(t *testing.T) {
@@ -36,14 +40,35 @@ func TestSignupNewUser(t *testing.T) {
 	if r == nil {
 		t.Errorf("The user has not signed up")
 	}
-
 	pimbay.DB.Cleanup()
-
 	r, err = pimbay.DB.GetUserByEmail(c1, testEmail)
 	if err != nil {
 		t.Fatalf("Failed to getting user: %v", err)
 	}
 	fmt.Println(r)
+}
+
+func TestGetUser(t *testing.T) {
+	id, err := pimbay.DB.SaveUser(context.Background(), &model.User{ID: 1234, FirebaseID: "asdf", Email: "agustinsarasua@gmail.com", Name: "Agustin"})
+	rr := httptest.NewRecorder()
+	var buffer bytes.Buffer
+	buffer.WriteString("/user/")
+	buffer.WriteString(strconv.FormatInt(id, 10))
+	fmt.Println(buffer.String())
+	req, err := http.NewRequest("GET", buffer.String(), nil)
+	if err != nil {
+		t.Fatalf("Failed to create req1: %v", err)
+	}
+	r := startServer()
+	r.ServeHTTP(rr, req)
+	var res *model.User
+	json.NewDecoder(rr.Body).Decode(&res)
+	fmt.Print(rr.Body.String())
+	pimbay.DB.Cleanup()
+	if res == nil {
+		t.Fatalf("Failed to get User: %v", err)
+	}
+
 }
 
 func init() {
@@ -55,6 +80,15 @@ func init() {
 	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	pimbay.FbAPI = api.NewFirebaseMockedAPI()
 	pimbay.DB, _ = configureDatastoreDB("pimbay-accounting")
+}
+
+func startServer() *mux.Router {
+	router := mux.NewRouter()
+	router.HandleFunc("/user/{id:[0-9]+}", route.GetUser).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}/accounts", route.GetUser).Methods("GET")
+	router.Methods("GET").Path("/_ah/health").HandlerFunc(route.HealthCheckHandler)
+	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, router))
+	return router
 }
 
 func configureDatastoreDB(projectID string) (db.Database, error) {

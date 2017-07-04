@@ -40,28 +40,6 @@ type mongoDB struct {
 	conn *mgo.Session
 }
 
-// Ensure mongoDB conforms to the UserDatabase interface.
-//var _ Database = &mongoDB{}
-
-// func NewMongoDB(addr, db, username, pwd, c string) (Database, error) {
-// 	// Mongo
-// 	mongoDBDialInfo := &mgo.DialInfo{
-// 		Addrs:    []string{addr},
-// 		Timeout:  60 * time.Second,
-// 		Database: db,
-// 		Username: username,
-// 		Password: pwd,
-// 	}
-// 	session, err := mgo.DialWithInfo(mongoDBDialInfo)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	//defer session.Close()
-// 	session.SetMode(mgo.Monotonic, true)
-
-// 	return &mongoDB{conn: session}, nil
-// }
-
 /**
 	Datastore
 **/
@@ -95,6 +73,7 @@ func (db *datastoreDB) Cleanup() {
 	q := datastore.NewQuery("User")
 	var usersData []*model.User
 	ks, _ := db.client.GetAll(ctx, q, &usersData)
+	fmt.Printf("Keys to delete %d\n", len(ks))
 	db.client.DeleteMulti(ctx, ks)
 	fmt.Println("Datastore cleaned up")
 }
