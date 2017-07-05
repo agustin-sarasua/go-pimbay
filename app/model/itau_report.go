@@ -10,17 +10,14 @@ import (
 )
 
 type ItauReport struct {
-	Content     string
-	Lines       []string
-	ReportLines []*ItauReportLine
+	Content string
+	Lines   []string
 }
 
-type ItauReportLine struct {
-	Date         time.Time
-	LastDigits   string
-	BusinessName string
-	Currency     string
-	Amount       decimal.Decimal
+var _ Report = &ItauReport{}
+
+func (r ItauReport) GetReportLines() []*ReportLine {
+	return nil
 }
 
 func (r ItauReport) IsTransactionLine(l string) bool {

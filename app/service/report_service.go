@@ -33,3 +33,7 @@ func PrintValidReportLines(r model.Report) {
 		fmt.Println(t, " ", ld, " ", bn, " ", c, a)
 	}
 }
+
+func ProcessReport(r *model.Report) {
+
+}
