@@ -1,10 +1,9 @@
-package service
+package reports
 
 import (
 	"bytes"
 	"fmt"
 
-	"github.com/agustin-sarasua/pimbay/app/model"
 	"github.com/ledongthuc/pdf"
 )
 
@@ -26,7 +25,7 @@ func ReadPdf(path string) (string, error) {
 	return textBuilder.String(), nil
 }
 
-func PrintValidReportLines(r model.Report) {
+func PrintValidReportLines(r Report) {
 	ls := r.GetTransactionLines()
 	for _, l := range ls {
 		t, ld, bn, c, a := r.ParseLineDetail(l)
@@ -34,6 +33,6 @@ func PrintValidReportLines(r model.Report) {
 	}
 }
 
-func ProcessReport(r *model.Report) {
+func ProcessReport(r *Report) {
 
 }
