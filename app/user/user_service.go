@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/agustin-sarasua/pimbay/app/api"
+	"github.com/agustin-sarasua/pimbay/app/firebase"
 )
 
 const (
@@ -19,9 +19,9 @@ const (
 	applicationContent     = "application/json"
 )
 
-func SignupNewUser(db UserDatabase, m *api.SignupUserRestMsg) *api.SignUpResponse {
+func SignupNewUser(db UserDatabase, m *SignupUserRestMsg) *firebase.SignUpResponse {
 	fmt.Println("SignUp new User")
-	r, _ := api.FbAPI.Signup(m.Email, m.Password, true)
+	r, _ := firebase.FbAPI.Signup(m.Email, m.Password, true)
 
 	u := User{FirebaseID: r.LocalID, Name: m.Name, LastName: m.LastName, CreatedDate: time.Now(), Birthdate: m.Birthdate, Email: m.Email, Sex: m.Sex}
 	id, _ := db.SaveUser(context.Background(), &u)
@@ -29,17 +29,17 @@ func SignupNewUser(db UserDatabase, m *api.SignupUserRestMsg) *api.SignUpRespons
 	return r
 }
 
-func SigninUser(email, pwd string) <-chan *api.SignUpResponse {
-	out := make(chan *api.SignUpResponse)
+func SigninUser(email, pwd string) <-chan *firebase.SignUpResponse {
+	out := make(chan *firebase.SignUpResponse)
 	go func() {
 		fmt.Println("SignIn User ", email)
-		jsonValue, _ := json.Marshal(api.SignUpRequest{Email: email, Password: pwd, ReturnSecureToken: true})
+		jsonValue, _ := json.Marshal(firebase.SignUpRequest{Email: email, Password: pwd, ReturnSecureToken: true})
 		resp, err := http.Post(signInEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
 		if err != nil {
 			panic(err)
 		}
 
-		var r api.SignUpResponse
+		var r firebase.SignUpResponse
 		err = json.NewDecoder(resp.Body).Decode(&r)
 		if err != nil {
 			panic(err)
@@ -49,8 +49,8 @@ func SigninUser(email, pwd string) <-chan *api.SignUpResponse {
 	return out
 }
 
-func GetAccountInfoS(tkn string) <-chan *api.AccountInfoReponse {
-	out := make(chan *api.AccountInfoReponse)
+func GetAccountInfoS(tkn string) <-chan *firebase.AccountInfoReponse {
+	out := make(chan *firebase.AccountInfoReponse)
 	go func() {
 		values := map[string]string{"idToken": tkn}
 		jsonValue, _ := json.Marshal(values)
@@ -59,7 +59,7 @@ func GetAccountInfoS(tkn string) <-chan *api.AccountInfoReponse {
 			panic(err)
 		}
 
-		var r api.AccountInfoReponse
+		var r firebase.AccountInfoReponse
 		err = json.NewDecoder(resp.Body).Decode(&r)
 		if err != nil {
 			panic(err)

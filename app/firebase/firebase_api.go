@@ -1,4 +1,4 @@
-package api
+package firebase
 
 var (
 	FbAPI FirebaseAPI

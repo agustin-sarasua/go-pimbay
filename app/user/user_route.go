@@ -7,7 +7,6 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/agustin-sarasua/pimbay/app/api"
 	"github.com/agustin-sarasua/pimbay/app/util"
 	"github.com/gorilla/mux"
 
@@ -30,7 +29,7 @@ func GetUser(w http.ResponseWriter, req *http.Request) {
 }
 
 func SignupNewUserEndpoint(w http.ResponseWriter, req *http.Request) {
-	var msg api.SignupUserRestMsg
+	var msg SignupUserRestMsg
 	err := json.NewDecoder(req.Body).Decode(&msg)
 
 	if err != nil {

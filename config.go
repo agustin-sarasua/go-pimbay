@@ -9,7 +9,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/agustin-sarasua/pimbay/app/account"
-	"github.com/agustin-sarasua/pimbay/app/api"
+	"github.com/agustin-sarasua/pimbay/app/firebase"
 	"github.com/agustin-sarasua/pimbay/app/user"
 )
 
@@ -36,7 +36,7 @@ func init() {
 	StorageBucketName = "pimbay-accounting.appspot.com"
 	StorageBucket, _ = configureStorage(StorageBucketName)
 	// [END storage]
-	api.FbAPI = api.NewFirebaseAPI()
+	firebase.FbAPI = firebase.NewFirebaseAPI()
 	flag.Usage = usage
 	// NOTE: This next line is key you have to call flag.Parse() for the command line
 	// options or "flags" that are defined in the glog module to be picked up.
