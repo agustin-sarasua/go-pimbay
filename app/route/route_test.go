@@ -10,6 +10,7 @@ import (
 	"github.com/agustin-sarasua/pimbay/app/api"
 	"github.com/agustin-sarasua/pimbay/app/db"
 	"github.com/agustin-sarasua/pimbay/app/route"
+	"github.com/agustin-sarasua/pimbay/app/user"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
@@ -28,8 +29,8 @@ func init() {
 
 func startTestServer() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/user/{id:[0-9]+}", route.GetUser).Methods("GET")
-	router.HandleFunc("/user/{id:[0-9]+}/accounts", route.GetUser).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}", user.GetUser).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}/accounts", user.GetUser).Methods("GET")
 	router.Methods("GET").Path("/_ah/health").HandlerFunc(route.HealthCheckHandler)
 	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, router))
 	return router

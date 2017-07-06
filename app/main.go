@@ -18,6 +18,7 @@ import (
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/app/route"
+	"github.com/agustin-sarasua/pimbay/app/user"
 	"github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -43,7 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	defer pimbay.DB.Close()
+	defer user.UserDB.Close()
 
 	defer glog.Flush()
 	StartServer()
@@ -55,15 +56,15 @@ func StartServer() {
 	//Gorilla MUX
 	router := mux.NewRouter()
 
-	router.HandleFunc("/signin", use(route.SigninUserEndpoint, route.BasicAuth)).Methods("POST")
-	router.HandleFunc("/signup", route.SignupNewUserEndpoint).Methods("POST")
-	router.HandleFunc("/user/{id:[0-9]+}", route.GetUser).Methods("GET")
+	router.HandleFunc("/signin", use(user.SigninUserEndpoint, route.BasicAuth)).Methods("POST")
+	router.HandleFunc("/signup", user.SignupNewUserEndpoint).Methods("POST")
+	router.HandleFunc("/user/{id:[0-9]+}", user.GetUser).Methods("GET")
 
-	router.HandleFunc("/user/{id:[0-9]+}/accounts", route.GetUser).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}/accounts", user.GetUser).Methods("GET")
 
 	router.HandleFunc("/account", use(route.CreateAccountEndpoint, route.ValidateToken)).Methods("POST")
 
-	router.HandleFunc("/hello", use(route.GetAccountInfo, route.ValidateToken)).Methods("GET")
+	router.HandleFunc("/hello", use(user.GetAccountInfo, route.ValidateToken)).Methods("GET")
 
 	router.Methods("GET").Path("/_ah/health").HandlerFunc(route.HealthCheckHandler)
 

@@ -9,8 +9,7 @@ import (
 
 	"fmt"
 
-	"github.com/agustin-sarasua/pimbay"
-	"github.com/agustin-sarasua/pimbay/app/service"
+	"github.com/agustin-sarasua/pimbay/app/user"
 )
 
 const userIdKey = 999
@@ -26,13 +25,13 @@ func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		c := service.GetAccountInfo(t)
+		c := user.GetAccountInfoS(t)
 		rs := <-c
 		if rs == nil {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
-		u, _ := pimbay.DB.GetUserByFirebaseID(context.Background(), rs.Users[0].LocalID)
+		u, _ := user.UserDB.GetUserByFirebaseID(context.Background(), rs.Users[0].LocalID)
 
 		ctx := context.WithValue(context.Background(), userIdKey, u.ID)
 		r = r.WithContext(ctx)
@@ -65,7 +64,7 @@ func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		c := service.SigninUser(pair[0], pair[1])
+		c := user.SigninUser(pair[0], pair[1])
 		rs := <-c
 		if rs == nil && rs.IDToken == "" {
 			http.Error(w, "Not authorized", 401)

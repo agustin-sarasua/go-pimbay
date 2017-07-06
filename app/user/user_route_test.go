@@ -1,4 +1,4 @@
-package route_test
+package user_test
 
 import (
 	"bytes"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/app/api"
-	"github.com/agustin-sarasua/pimbay/app/model"
 	"github.com/agustin-sarasua/pimbay/app/route"
 )
 
@@ -30,12 +29,12 @@ func TestSignupNewUser(t *testing.T) {
 	req = req.WithContext(c1)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
-	r, _ := pimbay.DB.GetUserByEmail(c1, testEmail)
+	r, _ := pimbay.UserDB.GetUserByEmail(c1, testEmail)
 	if r == nil {
 		t.Errorf("The user has not signed up")
 	}
-	pimbay.DB.Cleanup()
-	r, err = pimbay.DB.GetUserByEmail(c1, testEmail)
+	pimbay.UserDB.Cleanup()
+	r, err = pimbay.UserDB.GetUserByEmail(c1, testEmail)
 	if err != nil {
 		t.Fatalf("Failed to getting user: %v", err)
 	}
@@ -43,7 +42,7 @@ func TestSignupNewUser(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
-	id, err := pimbay.DB.SaveUser(context.Background(), &model.User{ID: 1234, FirebaseID: "asdf", Email: "agustinsarasua@gmail.com", Name: "Agustin"})
+	id, err := pimbay.UserDB.SaveUser(context.Background(), &User{ID: 1234, FirebaseID: "asdf", Email: "agustinsarasua@gmail.com", Name: "Agustin"})
 	rr := httptest.NewRecorder()
 	var buffer bytes.Buffer
 	buffer.WriteString("/user/")
@@ -55,10 +54,10 @@ func TestGetUser(t *testing.T) {
 	}
 	r := startTestServer()
 	r.ServeHTTP(rr, req)
-	var res *model.User
+	var res *User
 	json.NewDecoder(rr.Body).Decode(&res)
 	fmt.Print(rr.Body.String())
-	pimbay.DB.Cleanup()
+	pimbay.UserDB.Cleanup()
 	if res == nil {
 		t.Fatalf("Failed to get User: %v", err)
 	}

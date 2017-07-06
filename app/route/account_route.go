@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/agustin-sarasua/pimbay/app/model"
+	"github.com/agustin-sarasua/pimbay/app/util"
 )
 
 func CreateAccountEndpoint(w http.ResponseWriter, req *http.Request) {
@@ -14,7 +15,7 @@ func CreateAccountEndpoint(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&msg)
 
 	if err != nil {
-		ErrorWithJSON(w, "", http.StatusBadRequest)
+		util.ErrorWithJSON(w, "", http.StatusBadRequest)
 		return
 	}
 	msg.CreatedDate = time.Now()

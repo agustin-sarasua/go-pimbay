@@ -12,7 +12,7 @@ func TestSaveAccount(t *testing.T) {
 	//db, _ := db.NewDatastoreDB(ctx, client)
 
 	//db.Close()
-	// uid, _ := db.SaveUser(ctx, &model.User{})
+	// uid, _ := db.SaveUser(ctx, &User{})
 	// db.SaveAccount(ctx, &model.Account{}, uid)
 
 	// ac, _ := db.ListUserAccounts(ctx, uid)

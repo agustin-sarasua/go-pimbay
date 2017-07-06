@@ -15,13 +15,6 @@ import (
 )
 
 type Database interface {
-	SaveUser(ctx context.Context, u *model.User) (id int64, e error)
-	GetUser(ctx context.Context, id int64) (*model.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
-	GetUserByFirebaseID(ctx context.Context, fID string) (*model.User, error)
-	DeleteUser(id int64) error
-	Close()
-
 	SaveAccount(ctx context.Context, a *model.Account, uid int64) (id int64, e error)
 	GetAccount(ctx context.Context, id int64) (*model.Account, error)
 	ListUserAccounts(ctx context.Context, uid int64) (as []*model.Account, err error)
@@ -69,12 +62,4 @@ func NewDatastoreDB(ctx context.Context, client *datastore.Client) (Database, er
 }
 
 func (db *datastoreDB) Cleanup() {
-	fmt.Println("Cleaning up datastore...")
-	ctx := context.Background()
-	q := datastore.NewQuery("User")
-	var usersData []*model.User
-	ks, _ := db.client.GetAll(ctx, q, &usersData)
-	fmt.Printf("Keys to delete %d\n", len(ks))
-	db.client.DeleteMulti(ctx, ks)
-	fmt.Println("Datastore cleaned up")
 }
