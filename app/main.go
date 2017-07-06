@@ -17,6 +17,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 	"github.com/agustin-sarasua/pimbay"
+	"github.com/agustin-sarasua/pimbay/app/account"
 	"github.com/agustin-sarasua/pimbay/app/route"
 	"github.com/agustin-sarasua/pimbay/app/user"
 	"github.com/golang/glog"
@@ -62,7 +63,7 @@ func StartServer() {
 
 	router.HandleFunc("/user/{id:[0-9]+}/accounts", user.GetUser).Methods("GET")
 
-	router.HandleFunc("/account", use(route.CreateAccountEndpoint, route.ValidateToken)).Methods("POST")
+	router.HandleFunc("/account", use(account.CreateAccountEndpoint, route.ValidateToken)).Methods("POST")
 
 	router.HandleFunc("/hello", use(user.GetAccountInfo, route.ValidateToken)).Methods("GET")
 

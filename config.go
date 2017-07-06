@@ -8,13 +8,12 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	"github.com/agustin-sarasua/pimbay/app/account"
 	"github.com/agustin-sarasua/pimbay/app/api"
-	"github.com/agustin-sarasua/pimbay/app/db"
 	"github.com/agustin-sarasua/pimbay/app/user"
 )
 
 var (
-	DB                db.Database
 	StorageBucket     *storage.BucketHandle
 	StorageBucketName string
 )
@@ -27,7 +26,8 @@ func init() {
 	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
 	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	os.Setenv("GCLOUD_STORAGE_BUCKET", "pimbay-accounting.appspot.com")
-	DB, _ = configureDatastoreDB("pimbay-accounting")
+
+	account.AccountDB, _ = configureAccountDatastoreDB("pimbay-accounting")
 	user.UserDB, _ = configureUserDatastoreDB("pimbay-accounting")
 	// [START storage]
 	// To configure Cloud Storage, uncomment the following lines and update the
@@ -43,13 +43,13 @@ func init() {
 	flag.Parse()
 }
 
-func configureDatastoreDB(projectID string) (db.Database, error) {
+func configureAccountDatastoreDB(projectID string) (account.AccountDatabase, error) {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
-	return db.NewDatastoreDB(ctx, client)
+	return account.NewDatastoreDB(ctx, client)
 }
 
 func configureUserDatastoreDB(projectID string) (user.UserDatabase, error) {
