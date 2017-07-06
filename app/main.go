@@ -3,22 +3,25 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
+	"path"
 
 	"google.golang.org/appengine"
 
 	"cloud.google.com/go/storage"
 
+	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
 	"github.com/agustin-sarasua/pimbay"
 	"github.com/agustin-sarasua/pimbay/app/route"
 	"github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -78,40 +81,109 @@ func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFu
 	return h
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandler(rw http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "", http.StatusMethodNotAllowed)
+		http.Error(rw, "", http.StatusMethodNotAllowed)
 		return
 	}
 
 	//ctx := appengine.NewContext(r)
-	ctx := context.Background()
+	// ctx := context.Background()
+
 	f, fh, err := r.FormFile("file")
+	if err == http.ErrMissingFile {
+		return
+	}
 	if err != nil {
-		msg := fmt.Sprintf("Could not get file: %v", err)
-		http.Error(w, msg, http.StatusBadRequest)
-		return
-	}
-	defer f.Close()
-
-	fmt.Println(bucket)
-
-	sw := storageClient.Bucket(bucket).Object(fh.Filename).NewWriter(ctx)
-	if _, err := io.Copy(sw, f); err != nil {
-		msg := fmt.Sprintf("Could not write file: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 
-	if err := sw.Close(); err != nil {
-		msg := fmt.Sprintf("Could not put file: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
+	if pimbay.StorageBucket == nil {
 		return
 	}
 
-	u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
+	// random filename, retaining existing extension.
+	name := uuid.NewV4().String() + path.Ext(fh.Filename)
 
-	fmt.Fprintf(w, "Successful! URL: https://storage.googleapis.com%s", u.EscapedPath())
+	ctx := context.Background()
+	w := pimbay.StorageBucket.Object(name).NewWriter(ctx)
+	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
+	w.ContentType = fh.Header.Get("Content-Type")
+
+	// Entries are immutable, be aggressive about caching (1 day).
+	w.CacheControl = "public, max-age=86400"
+
+	if _, err := io.Copy(w, f); err != nil {
+		return
+	}
+	if err := w.Close(); err != nil {
+		return
+	}
+
+	const publicURL = "https://storage.googleapis.com/%s/%s"
+
+	// f, fh, err := r.FormFile("file")
+	// if err != nil {
+	// 	msg := fmt.Sprintf("Could not get file: %v", err)
+	// 	http.Error(w, msg, http.StatusBadRequest)
+	// 	return
+	// }
+	// defer f.Close()
+
+	// fmt.Println(bucket)
+
+	// sw := storageClient.Bucket(bucket).Object(fh.Filename).NewWriter(ctx)
+	// if _, err := io.Copy(sw, f); err != nil {
+	// 	msg := fmt.Sprintf("Could not write file: %v", err)
+	// 	http.Error(w, msg, http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// if err := sw.Close(); err != nil {
+	// 	msg := fmt.Sprintf("Could not put file: %v", err)
+	// 	http.Error(w, msg, http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
+
+	fmt.Fprintf(rw, fmt.Sprintf(publicURL, pimbay.StorageBucketName, name))
+}
+
+// uploadFileFromForm uploads a file if it's present in the "image" form field.
+func uploadFileFromForm(r *http.Request) (url string, err error) {
+	f, fh, err := r.FormFile("image")
+	if err == http.ErrMissingFile {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+
+	if pimbay.StorageBucket == nil {
+		return "", errors.New("storage bucket is missing - check config.go")
+	}
+
+	// random filename, retaining existing extension.
+	name := uuid.NewV4().String() + path.Ext(fh.Filename)
+
+	ctx := context.Background()
+	w := bookshelf.StorageBucket.Object(name).NewWriter(ctx)
+	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
+	w.ContentType = fh.Header.Get("Content-Type")
+
+	// Entries are immutable, be aggressive about caching (1 day).
+	w.CacheControl = "public, max-age=86400"
+
+	if _, err := io.Copy(w, f); err != nil {
+		return "", err
+	}
+	if err := w.Close(); err != nil {
+		return "", err
+	}
+
+	const publicURL = "https://storage.googleapis.com/%s/%s"
+	return fmt.Sprintf(publicURL, bookshelf.StorageBucketName, name), nil
 }
 
 func formHandler(w http.ResponseWriter, r *http.Request) {

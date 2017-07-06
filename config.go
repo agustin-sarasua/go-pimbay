@@ -7,13 +7,16 @@ import (
 	"os"
 
 	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/storage"
 	"github.com/agustin-sarasua/pimbay/app/api"
 	"github.com/agustin-sarasua/pimbay/app/db"
 )
 
 var (
-	DB    db.Database
-	FbAPI api.FirebaseAPI
+	DB                db.Database
+	FbAPI             api.FirebaseAPI
+	StorageBucket     *storage.BucketHandle
+	StorageBucketName string
 )
 
 func init() {
@@ -23,7 +26,15 @@ func init() {
 	os.Setenv("DATASTORE_EMULATOR_HOST_PATH", "localhost:8081/datastore")
 	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
 	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
+	os.Setenv("GCLOUD_STORAGE_BUCKET", "pimbay-accounting.appspot.com")
 	DB, _ = configureDatastoreDB("pimbay-accounting")
+	// [START storage]
+	// To configure Cloud Storage, uncomment the following lines and update the
+	// bucket name.
+	//
+	StorageBucketName = "pimbay-accounting.appspot.com"
+	StorageBucket, _ = configureStorage(StorageBucketName)
+	// [END storage]
 	FbAPI = api.NewFirebaseAPI()
 	flag.Usage = usage
 	// NOTE: This next line is key you have to call flag.Parse() for the command line
@@ -38,6 +49,15 @@ func configureDatastoreDB(projectID string) (db.Database, error) {
 		return nil, err
 	}
 	return db.NewDatastoreDB(ctx, client)
+}
+
+func configureStorage(bucketID string) (*storage.BucketHandle, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.Bucket(bucketID), nil
 }
 
 func usage() {

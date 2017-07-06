@@ -4,7 +4,7 @@ api_version: 1
 
 env_variables:
   OAUTH2_CALLBACK: https://pimbay-accounting.appspot.com/oauth2callback
-  GCLOUD_STORAGE_BUCKET: reports
+  GCLOUD_STORAGE_BUCKET: reports-acc-pimbay
 
 # automatic_scaling:
 #   min_num_instances: 1
