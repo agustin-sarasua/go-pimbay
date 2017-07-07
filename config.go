@@ -10,12 +10,8 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/agustin-sarasua/pimbay/app/account"
 	"github.com/agustin-sarasua/pimbay/app/firebase"
+	"github.com/agustin-sarasua/pimbay/app/reports"
 	"github.com/agustin-sarasua/pimbay/app/user"
-)
-
-var (
-	StorageBucket     *storage.BucketHandle
-	StorageBucketName string
 )
 
 func init() {
@@ -33,8 +29,8 @@ func init() {
 	// To configure Cloud Storage, uncomment the following lines and update the
 	// bucket name.
 	//
-	StorageBucketName = "pimbay-accounting.appspot.com"
-	StorageBucket, _ = configureStorage(StorageBucketName)
+	reports.StorageBucketName = "pimbay-accounting.appspot.com"
+	reports.StorageBucket, _ = configureStorage(reports.StorageBucketName)
 	// [END storage]
 	firebase.FbAPI = firebase.NewFirebaseAPI()
 	flag.Usage = usage
