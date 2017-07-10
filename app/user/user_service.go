@@ -32,12 +32,13 @@ func SignupNewUser(db UserDatabase, m *SignupUserRestMsg) *firebase.SignUpRespon
 func SigninUser(email, pwd string) <-chan *firebase.SignUpResponse {
 	out := make(chan *firebase.SignUpResponse)
 	go func() {
-		fmt.Println("SignIn User ", email)
+		fmt.Println("SignIn User ", email, pwd)
 		jsonValue, _ := json.Marshal(firebase.SignUpRequest{Email: email, Password: pwd, ReturnSecureToken: true})
 		resp, err := http.Post(signInEndpoint, applicationContent, bytes.NewBuffer(jsonValue))
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(resp)
 
 		var r firebase.SignUpResponse
 		err = json.NewDecoder(resp.Body).Decode(&r)

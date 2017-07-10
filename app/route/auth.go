@@ -68,6 +68,7 @@ func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Not authorized", 401)
 			return
 		}
+		fmt.Println(rs)
 		w.Header().Set("token", rs.IDToken)
 		h.ServeHTTP(w, r)
 	}
