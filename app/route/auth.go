@@ -16,7 +16,6 @@ const userIdKey = 999
 
 func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 
 		t := r.Header.Get("Token")
@@ -43,9 +42,8 @@ func ValidateToken(h http.HandlerFunc) http.HandlerFunc {
 
 func BasicAuth(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-
+		fmt.Println("Basic Auth...")
 		s := strings.SplitN(r.Header.Get("Authorization"), " ", 2)
 		if len(s) != 2 {
 			http.Error(w, "Not authorized", 401)

@@ -1,4 +1,4 @@
-package pimbay
+package main
 
 import (
 	"context"
@@ -22,6 +22,8 @@ func init() {
 	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
 	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	os.Setenv("GCLOUD_STORAGE_BUCKET", "pimbay-accounting.appspot.com")
+
+	os.Setenv("ORIGIN_ALLOWED", "http://localhost:4200")
 
 	account.AccountDB, _ = configureAccountDatastoreDB("pimbay-accounting")
 	user.UserDB, _ = configureUserDatastoreDB("pimbay-accounting")

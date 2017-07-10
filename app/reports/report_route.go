@@ -49,7 +49,7 @@ func ProcessAccountReportEndpoint(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	name, err := mux.Vars(req)["name"]
+	_, err := mux.Vars(req)["name"]
 	if err {
 		util.ErrorWithJSON(w, "", http.StatusBadRequest)
 		return

@@ -19,6 +19,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 var (
@@ -40,7 +41,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	defer user.UserDB.Close()
+	//defer user.UserDB.Close()
 
 	defer glog.Flush()
 	StartServer()
@@ -70,7 +71,14 @@ func StartServer() {
 	router.HandleFunc("/report/upload", reports.FormHandler)
 	router.HandleFunc("/upload", reports.UploadHandler)
 
-	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, router))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"origin", "Access-Control-Request-Method", "authorization", "x-pimbaauth", "Access-Control-Allow-Origin", "X-Requested-With", "Authorization", "Content-Type"}})
+	handler := c.Handler(router)
+
+	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, handler))
 	appengine.Main()
 }
 
