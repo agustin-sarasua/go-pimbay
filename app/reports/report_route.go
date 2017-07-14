@@ -1,18 +1,14 @@
 package reports
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"path"
 
 	"cloud.google.com/go/storage"
 	"github.com/agustin-sarasua/pimbay/app/route"
 	"github.com/agustin-sarasua/pimbay/app/util"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -68,10 +64,8 @@ func UploadHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//ctx := appengine.NewContext(r)
-	// ctx := context.Background()
-
 	f, fh, err := r.FormFile("file")
+
 	if err == http.ErrMissingFile {
 		return
 	}
@@ -79,31 +73,16 @@ func UploadHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if StorageBucket == nil {
-		return
-	}
+	nc := PushReportToCloudStorage(f, fh)
+	rc := ProcessReport(f, fh)
+	n := <-nc
+	rs := <-rc
 
-	// random filename, retaining existing extension.
-	name := uuid.NewV4().String() + path.Ext(fh.Filename)
-
-	ctx := context.Background()
-	w := StorageBucket.Object(name).NewWriter(ctx)
-	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
-	w.ContentType = fh.Header.Get("Content-Type")
-
-	// Entries are immutable, be aggressive about caching (1 day).
-	w.CacheControl = "public, max-age=86400"
-
-	if _, err := io.Copy(w, f); err != nil {
-		return
-	}
-	if err := w.Close(); err != nil {
-		return
-	}
+	fmt.Println(rs)
 
 	const publicURL = "https://storage.googleapis.com/%s/%s"
 
-	fmt.Fprintf(rw, fmt.Sprintf(publicURL, StorageBucketName, name))
+	fmt.Fprintf(rw, fmt.Sprintf(publicURL, StorageBucketName, n))
 }
 
 func FormHandler(w http.ResponseWriter, r *http.Request) {

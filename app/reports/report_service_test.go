@@ -1,10 +1,13 @@
 package reports_test
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
+	"cloud.google.com/go/storage"
 
 	"github.com/agustin-sarasua/pimbay/app/reports"
 
@@ -58,4 +61,21 @@ func TestFormatShortYear(t *testing.T) {
 	r, _ := time.Parse(layout, value)
 	fmt.Println(r)
 
+}
+
+func TestReadFile(t *testing.T) {
+	reports.StorageBucketName = "pimbay-accounting.appspot.com"
+	reports.StorageBucket, _ = configureStorage(reports.StorageBucketName)
+
+	s, _ := reports.ReadFile("f0e9d430-496f-4858-92d0-e8140c2f3984.pdf", context.Background())
+	fmt.Println(s)
+}
+
+func configureStorage(bucketID string) (*storage.BucketHandle, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.Bucket(bucketID), nil
 }
