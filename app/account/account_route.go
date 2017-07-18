@@ -1,4 +1,4 @@
-package route
+package account
 
 import (
 	"encoding/json"
@@ -6,15 +6,15 @@ import (
 
 	"time"
 
-	"github.com/agustin-sarasua/pimbay/app/model"
+	"github.com/agustin-sarasua/pimbay/app/util"
 )
 
 func CreateAccountEndpoint(w http.ResponseWriter, req *http.Request) {
-	var msg model.Account
+	var msg Account
 	err := json.NewDecoder(req.Body).Decode(&msg)
 
 	if err != nil {
-		ErrorWithJSON(w, "", http.StatusBadRequest)
+		util.ErrorWithJSON(w, "", http.StatusBadRequest)
 		return
 	}
 	msg.CreatedDate = time.Now()

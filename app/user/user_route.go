@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"encoding/json"
@@ -7,13 +7,10 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/agustin-sarasua/pimbay"
-	"github.com/agustin-sarasua/pimbay/app/api"
+	"github.com/agustin-sarasua/pimbay/app/util"
 	"github.com/gorilla/mux"
 
 	"fmt"
-
-	"github.com/agustin-sarasua/pimbay/app/service"
 )
 
 func GetUser(w http.ResponseWriter, req *http.Request) {
@@ -23,7 +20,7 @@ func GetUser(w http.ResponseWriter, req *http.Request) {
 		fmt.Errorf("bad user id: %v", err)
 		return
 	}
-	u, err := pimbay.DB.GetUser(context.Background(), id)
+	u, err := UserDB.GetUser(context.Background(), id)
 	fmt.Println(u)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -32,15 +29,15 @@ func GetUser(w http.ResponseWriter, req *http.Request) {
 }
 
 func SignupNewUserEndpoint(w http.ResponseWriter, req *http.Request) {
-	var msg api.SignupUserRestMsg
+	var msg SignupUserRestMsg
 	err := json.NewDecoder(req.Body).Decode(&msg)
 
 	if err != nil {
-		ErrorWithJSON(w, "", http.StatusBadRequest)
+		util.ErrorWithJSON(w, "", http.StatusBadRequest)
 		return
 	}
 
-	service.SignupNewUser(pimbay.DB, &msg)
+	SignupNewUser(UserDB, &msg)
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusCreated)

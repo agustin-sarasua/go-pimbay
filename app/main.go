@@ -3,25 +3,23 @@ package main
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
-	"path"
 
 	"google.golang.org/appengine"
 
 	"cloud.google.com/go/storage"
 
-	"github.com/GoogleCloudPlatform/golang-samples/getting-started/bookshelf"
-	"github.com/agustin-sarasua/pimbay"
+	"github.com/agustin-sarasua/pimbay/app/account"
+	"github.com/agustin-sarasua/pimbay/app/reports"
 	"github.com/agustin-sarasua/pimbay/app/route"
+	"github.com/agustin-sarasua/pimbay/app/user"
 	"github.com/golang/glog"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
+	"github.com/rs/cors"
 )
 
 var (
@@ -43,7 +41,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	defer pimbay.DB.Close()
+	//defer user.UserDB.Close()
 
 	defer glog.Flush()
 	StartServer()
@@ -55,22 +53,32 @@ func StartServer() {
 	//Gorilla MUX
 	router := mux.NewRouter()
 
-	router.HandleFunc("/signin", use(route.SigninUserEndpoint, route.BasicAuth)).Methods("POST")
-	router.HandleFunc("/signup", route.SignupNewUserEndpoint).Methods("POST")
-	router.HandleFunc("/user/{id:[0-9]+}", route.GetUser).Methods("GET")
+	router.HandleFunc("/signin", use(user.SigninUserEndpoint, route.BasicAuth)).Methods("POST")
+	router.HandleFunc("/signup", user.SignupNewUserEndpoint).Methods("POST")
+	router.HandleFunc("/user/{id:[0-9]+}", user.GetUser).Methods("GET")
 
-	router.HandleFunc("/user/{id:[0-9]+}/accounts", route.GetUser).Methods("GET")
+	router.HandleFunc("/user/{id:[0-9]+}/accounts", user.GetUser).Methods("GET")
 
-	router.HandleFunc("/account", use(route.CreateAccountEndpoint, route.ValidateToken)).Methods("POST")
+	router.HandleFunc("/account", use(account.CreateAccountEndpoint, route.ValidateToken)).Methods("POST")
 
-	router.HandleFunc("/hello", use(route.GetAccountInfo, route.ValidateToken)).Methods("GET")
+	router.HandleFunc("/hello", use(user.GetAccountInfo, route.ValidateToken)).Methods("GET")
 
 	router.Methods("GET").Path("/_ah/health").HandlerFunc(route.HealthCheckHandler)
 
-	router.HandleFunc("/report/upload", formHandler)
-	router.HandleFunc("/upload", uploadHandler)
+	router.HandleFunc("/account/{id:[0-9]+}/report", use(reports.SaveAccountReportEndpoint, route.ValidateToken)).Methods("POST")
+	router.HandleFunc("/report/{name:.*}/process", use(reports.SaveAccountReportEndpoint, route.ValidateToken)).Methods("POST")
 
-	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, router))
+	router.HandleFunc("/report/upload", reports.FormHandler)
+	router.HandleFunc("/upload", reports.UploadHandler)
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"origin", "Access-Control-Request-Method", "authorization", "x-pimbaauth", "Access-Control-Allow-Origin", "X-Requested-With", "Authorization", "Content-Type"}})
+	handler := c.Handler(router)
+
+	http.Handle("/", handlers.CombinedLoggingHandler(os.Stderr, handler))
 	appengine.Main()
 }
 
@@ -80,126 +88,3 @@ func use(h http.HandlerFunc, middleware ...func(http.HandlerFunc) http.HandlerFu
 	}
 	return h
 }
-
-func uploadHandler(rw http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(rw, "", http.StatusMethodNotAllowed)
-		return
-	}
-
-	//ctx := appengine.NewContext(r)
-	// ctx := context.Background()
-
-	f, fh, err := r.FormFile("file")
-	if err == http.ErrMissingFile {
-		return
-	}
-	if err != nil {
-		return
-	}
-
-	if pimbay.StorageBucket == nil {
-		return
-	}
-
-	// random filename, retaining existing extension.
-	name := uuid.NewV4().String() + path.Ext(fh.Filename)
-
-	ctx := context.Background()
-	w := pimbay.StorageBucket.Object(name).NewWriter(ctx)
-	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
-	w.ContentType = fh.Header.Get("Content-Type")
-
-	// Entries are immutable, be aggressive about caching (1 day).
-	w.CacheControl = "public, max-age=86400"
-
-	if _, err := io.Copy(w, f); err != nil {
-		return
-	}
-	if err := w.Close(); err != nil {
-		return
-	}
-
-	const publicURL = "https://storage.googleapis.com/%s/%s"
-
-	// f, fh, err := r.FormFile("file")
-	// if err != nil {
-	// 	msg := fmt.Sprintf("Could not get file: %v", err)
-	// 	http.Error(w, msg, http.StatusBadRequest)
-	// 	return
-	// }
-	// defer f.Close()
-
-	// fmt.Println(bucket)
-
-	// sw := storageClient.Bucket(bucket).Object(fh.Filename).NewWriter(ctx)
-	// if _, err := io.Copy(sw, f); err != nil {
-	// 	msg := fmt.Sprintf("Could not write file: %v", err)
-	// 	http.Error(w, msg, http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if err := sw.Close(); err != nil {
-	// 	msg := fmt.Sprintf("Could not put file: %v", err)
-	// 	http.Error(w, msg, http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
-
-	fmt.Fprintf(rw, fmt.Sprintf(publicURL, pimbay.StorageBucketName, name))
-}
-
-// uploadFileFromForm uploads a file if it's present in the "image" form field.
-func uploadFileFromForm(r *http.Request) (url string, err error) {
-	f, fh, err := r.FormFile("image")
-	if err == http.ErrMissingFile {
-		return "", nil
-	}
-	if err != nil {
-		return "", err
-	}
-
-	if pimbay.StorageBucket == nil {
-		return "", errors.New("storage bucket is missing - check config.go")
-	}
-
-	// random filename, retaining existing extension.
-	name := uuid.NewV4().String() + path.Ext(fh.Filename)
-
-	ctx := context.Background()
-	w := bookshelf.StorageBucket.Object(name).NewWriter(ctx)
-	w.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
-	w.ContentType = fh.Header.Get("Content-Type")
-
-	// Entries are immutable, be aggressive about caching (1 day).
-	w.CacheControl = "public, max-age=86400"
-
-	if _, err := io.Copy(w, f); err != nil {
-		return "", err
-	}
-	if err := w.Close(); err != nil {
-		return "", err
-	}
-
-	const publicURL = "https://storage.googleapis.com/%s/%s"
-	return fmt.Sprintf(publicURL, bookshelf.StorageBucketName, name), nil
-}
-
-func formHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, formHTML)
-}
-
-const formHTML = `<!DOCTYPE html>
-<html>
-  <head>
-    <title>Storage</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <form method="POST" action="/upload" enctype="multipart/form-data">
-      <input type="file" name="file">
-      <input type="submit">
-    </form>
-  </body>
-</html>`

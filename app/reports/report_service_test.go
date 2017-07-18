@@ -1,15 +1,17 @@
-package service_test
+package reports_test
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
-	"regexp"
+	"cloud.google.com/go/storage"
 
-	"github.com/agustin-sarasua/pimbay/app/model"
-	"github.com/agustin-sarasua/pimbay/app/service"
+	"github.com/agustin-sarasua/pimbay/app/reports"
+
+	"regexp"
 )
 
 const (
@@ -20,7 +22,7 @@ const (
 func TestReadPdf(t *testing.T) {
 	var lineSearch = regexp.MustCompile(`^([0-3][0-9])(\ )([0-1][0-9])(\ )([0-2][0-9])(\ ){2}\d{4}`)
 	fmt.Println("Running test")
-	content, err := service.ReadPdf("../resources/Est_Cta_Visa_201701.pdf")
+	content, err := reports.ReadPdf("../resources/Est_Cta_Visa_201701.pdf")
 	if err != nil {
 		panic(err)
 	}
@@ -43,14 +45,14 @@ func TestReadPdf(t *testing.T) {
 }
 
 func TestReportParser(t *testing.T) {
-	content, err := service.ReadPdf("../resources/Est_Cta_Visa_201701.pdf")
+	content, err := reports.ReadPdf("../resources/Est_Cta_Visa_201701.pdf")
 	if err != nil {
 		panic(err)
 	}
 	lines := strings.Split(content, "\n")
 
-	report := model.ItauReport{Content: content, Lines: lines}
-	service.PrintValidReportLines(report)
+	report := reports.ItauReport{Content: content, Lines: lines}
+	reports.PrintValidReportLines(report)
 }
 
 func TestFormatShortYear(t *testing.T) {
@@ -59,4 +61,21 @@ func TestFormatShortYear(t *testing.T) {
 	r, _ := time.Parse(layout, value)
 	fmt.Println(r)
 
+}
+
+func TestReadFile(t *testing.T) {
+	reports.StorageBucketName = "pimbay-accounting.appspot.com"
+	reports.StorageBucket, _ = configureStorage(reports.StorageBucketName)
+
+	s, _ := reports.ReadFile("f0e9d430-496f-4858-92d0-e8140c2f3984.pdf", context.Background())
+	fmt.Println(s)
+}
+
+func configureStorage(bucketID string) (*storage.BucketHandle, error) {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.Bucket(bucketID), nil
 }

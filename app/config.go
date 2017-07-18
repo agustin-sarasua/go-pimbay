@@ -1,4 +1,4 @@
-package pimbay
+package main
 
 import (
 	"context"
@@ -8,15 +8,10 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
-	"github.com/agustin-sarasua/pimbay/app/api"
-	"github.com/agustin-sarasua/pimbay/app/db"
-)
-
-var (
-	DB                db.Database
-	FbAPI             api.FirebaseAPI
-	StorageBucket     *storage.BucketHandle
-	StorageBucketName string
+	"github.com/agustin-sarasua/pimbay/app/account"
+	"github.com/agustin-sarasua/pimbay/app/firebase"
+	"github.com/agustin-sarasua/pimbay/app/reports"
+	"github.com/agustin-sarasua/pimbay/app/user"
 )
 
 func init() {
@@ -27,28 +22,41 @@ func init() {
 	os.Setenv("DATASTORE_HOST", "http://localhost:8081")
 	os.Setenv("DATASTORE_PROJECT_ID", "pimbay-accounting")
 	os.Setenv("GCLOUD_STORAGE_BUCKET", "pimbay-accounting.appspot.com")
-	DB, _ = configureDatastoreDB("pimbay-accounting")
+
+	os.Setenv("ORIGIN_ALLOWED", "http://localhost:4200")
+
+	account.AccountDB, _ = configureAccountDatastoreDB("pimbay-accounting")
+	user.UserDB, _ = configureUserDatastoreDB("pimbay-accounting")
 	// [START storage]
 	// To configure Cloud Storage, uncomment the following lines and update the
 	// bucket name.
 	//
-	StorageBucketName = "pimbay-accounting.appspot.com"
-	StorageBucket, _ = configureStorage(StorageBucketName)
+	reports.StorageBucketName = "pimbay-accounting.appspot.com"
+	reports.StorageBucket, _ = configureStorage(reports.StorageBucketName)
 	// [END storage]
-	FbAPI = api.NewFirebaseAPI()
+	firebase.FbAPI = firebase.NewFirebaseAPI()
 	flag.Usage = usage
 	// NOTE: This next line is key you have to call flag.Parse() for the command line
 	// options or "flags" that are defined in the glog module to be picked up.
 	flag.Parse()
 }
 
-func configureDatastoreDB(projectID string) (db.Database, error) {
+func configureAccountDatastoreDB(projectID string) (account.AccountDatabase, error) {
 	ctx := context.Background()
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
-	return db.NewDatastoreDB(ctx, client)
+	return account.NewDatastoreDB(ctx, client)
+}
+
+func configureUserDatastoreDB(projectID string) (user.UserDatabase, error) {
+	ctx := context.Background()
+	client, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	return user.NewDatastoreDB(ctx, client)
 }
 
 func configureStorage(bucketID string) (*storage.BucketHandle, error) {
