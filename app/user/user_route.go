@@ -47,7 +47,7 @@ func SignupNewUserEndpoint(w http.ResponseWriter, req *http.Request) {
 
 func SigninUserEndpoint(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("User Logged in with token: ", w.Header().Get("token"))
-
+	fmt.Fprintf(w, "{\"token\": %q}", w.Header().Get("token"))
 }
 
 func GetAccountInfo(w http.ResponseWriter, req *http.Request) {
